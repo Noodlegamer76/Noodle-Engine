@@ -4,6 +4,8 @@ plugins {
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'org.spongepowered.mixin' version '0.7.+'
+    id "com.github.johnrengelman.shadow" version "7.0.0"
 }
 
 version = mod_version
@@ -131,7 +133,40 @@ dependencies {
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    minecraftLibrary 'de.javagl:jgltf-model:2.0.4'
+    //minecraftLibrary 'de.javagl:jgltf-model:2.0.4'
+
+    minecraftLibrary "io.github.spair:imgui-java-binding:${project.imguiVersion}"
+
+    minecraftLibrary("io.github.spair:imgui-java-lwjgl3:${project.imguiVersion}") {
+        exclude group: "org.lwjgl"
+    }
+
+
+    shadow "io.github.spair:imgui-java-binding:${project.imguiVersion}"
+
+    shadow("io.github.spair:imgui-java-lwjgl3:${project.imguiVersion}") {
+        exclude group: "org.lwjgl"
+    }
+
+    //minecraftLibrary("io.github.spair:imgui-java-natives-windows:${project.imguiVersion}") {
+    //    exclude group: "org.lwjgl"
+    //}
+    //minecraftLibrary("io.github.spair:imgui-java-natives-linux:${project.imguiVersion}") {
+    //    exclude group: "org.lwjgl"
+    //}
+    //minecraftLibrary("io.github.spair:imgui-java-natives-macos:${project.imguiVersion}") {
+    //    exclude group: "org.lwjgl"
+    //}
+//
+//
+    //shadow "io.github.spair:imgui-java-binding:${project.imguiVersion}"
+//
+    //shadow("io.github.spair:imgui-java-lwjgl3:${project.imguiVersion}") {
+    //    exclude group: "org.lwjgl"
+    //}
+    //shadow "io.github.spair:imgui-java-natives-windows:${project.imguiVersion}"
+    //shadow "io.github.spair:imgui-java-natives-linux:${project.imguiVersion}"
+    //shadow "io.github.spair:imgui-java-natives-macos:${project.imguiVersion}"
 
     //implementation("org.jmonkeyengine:jme3-jbullet:3.9.0-alpha5")
 
@@ -209,4 +244,25 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+
+mixin {
+    // MixinGradle Settings
+    add sourceSets.main, 'mixins.noodle_engine.refmap.json'
+    config 'noodle_engine.mixins.json'
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+//    classifier 'shadow-dev'
+    dependencies {
+        exclude(dependency('org.lwjgl:lwjgl'))
+        exclude(dependency('org.lwjgl:lwjgl-glfw'))
+        exclude(dependency('org.lwjgl:lwjgl-opengl'))
+    }
+}
+
+build {
+    finalizedBy shadowJar
 }

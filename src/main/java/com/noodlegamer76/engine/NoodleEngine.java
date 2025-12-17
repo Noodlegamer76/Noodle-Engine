@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 @Mod(NoodleEngine.MODID)
 public class NoodleEngine {
     public static final String MODID = "noodle_engine";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public NoodleEngine(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();

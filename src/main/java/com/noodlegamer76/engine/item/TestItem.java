@@ -4,6 +4,7 @@ import com.noodlegamer76.engine.core.component.InitComponents;
 import com.noodlegamer76.engine.core.component.components.ModelRenderer;
 import com.noodlegamer76.engine.entity.GameObject;
 import com.noodlegamer76.engine.entity.InitEntities;
+import com.noodlegamer76.engine.gui.imgui.core.ImGuiScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.renderer.ItemModelShaper;
@@ -33,24 +34,28 @@ public class TestItem extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
-        if (!level.isClientSide) {
-            GameObject object = new GameObject(InitEntities.GAME_OBJECT.get(), level);
+       //if (!level.isClientSide) {
+       //    GameObject object = new GameObject(InitEntities.GAME_OBJECT.get(), level);
 
-            object.setPos(player.getX(), player.getY(), player.getZ());
+       //    object.setPos(player.getX(), player.getY(), player.getZ());
 
-            ModelRenderer modelRenderer = new ModelRenderer(object);
-            object.addComponent(modelRenderer);
+       //    ModelRenderer modelRenderer = new ModelRenderer(object);
+       //    object.addComponent(modelRenderer);
 
-            //Block example
-            BlockState blockState = Blocks.BAMBOO_BLOCK.defaultBlockState();
-            ModelResourceLocation block = BlockModelShaper.stateToModelLocation(blockState);
+       //    //Block example
+       //    BlockState blockState = Blocks.BAMBOO_BLOCK.defaultBlockState();
+       //    ModelResourceLocation block = BlockModelShaper.stateToModelLocation(blockState);
 
-            //Item example
-            ModelResourceLocation item = new ModelResourceLocation("minecraft", "diamond", "inventory");
+       //    //Item example
+       //    ModelResourceLocation item = new ModelResourceLocation("minecraft", "diamond", "inventory");
 
-            modelRenderer.setModel(block);
+       //    modelRenderer.setModel(block);
 
-            level.addFreshEntity(object);
+       //    level.addFreshEntity(object);
+       //}
+
+        if (level.isClientSide) {
+            Minecraft.getInstance().setScreen(new ImGuiScreen());
         }
 
         return super.use(level, player, usedHand);
