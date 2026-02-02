@@ -1,26 +1,17 @@
 package com.noodlegamer76.engine.item;
 
-import com.noodlegamer76.engine.core.component.InitComponents;
 import com.noodlegamer76.engine.core.component.components.ModelRenderer;
 import com.noodlegamer76.engine.entity.GameObject;
 import com.noodlegamer76.engine.entity.InitEntities;
-import com.noodlegamer76.engine.gui.imgui.core.ImGuiScreen;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.CreeperModel;
-import net.minecraft.client.renderer.ItemModelShaper;
+import com.noodlegamer76.engine.physics.PhysicsEngine;
 import net.minecraft.client.renderer.block.BlockModelShaper;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -53,9 +44,8 @@ public class TestItem extends Item {
 
        //    level.addFreshEntity(object);
        //}
-
         if (level.isClientSide) {
-            Minecraft.getInstance().setScreen(new ImGuiScreen());
+            PhysicsEngine.getInstance().testAdd(player.position());
         }
 
         return super.use(level, player, usedHand);

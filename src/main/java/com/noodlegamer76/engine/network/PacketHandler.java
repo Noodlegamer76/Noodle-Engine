@@ -10,7 +10,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public class PacketHandler {
     public static final SimpleChannel INSTANCE = NetworkRegistry.ChannelBuilder.named(
-            ResourceLocation.fromNamespaceAndPath(NoodleEngine.MODID, "main"))
+                    ResourceLocation.fromNamespaceAndPath(NoodleEngine.MODID, "main"))
             .serverAcceptedVersions((e) -> true)
             .clientAcceptedVersions((e) -> true)
             .networkProtocolVersion(() -> "0")
@@ -21,6 +21,12 @@ public class PacketHandler {
                 .encoder(ComponentPacket::encode)
                 .decoder(ComponentPacket::new)
                 .consumerMainThread(ComponentPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ImGuiButtonPacket.class, 1, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ImGuiButtonPacket::encode)
+                .decoder(ImGuiButtonPacket::new)
+                .consumerMainThread(ImGuiButtonPacket::handle)
                 .add();
     }
 
