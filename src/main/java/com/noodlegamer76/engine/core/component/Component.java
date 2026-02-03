@@ -15,7 +15,7 @@ public abstract class Component implements SyncedVarOwner {
     protected final RegistryObject<ComponentType<?>> type;
     public int id;
 
-    protected Component(RegistryObject<ComponentType<? extends Component>> type, GameObject gameObject) {
+    protected Component(RegistryObject<ComponentType<?>> type, GameObject gameObject) {
         this.gameObject = gameObject;
         this.type = type;
         this.id = gameObject.nextId();

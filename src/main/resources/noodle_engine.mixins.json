@@ -10,5 +10,8 @@
     "requireAnnotations": true
   },
   "client": [
+    "BufferBuilderMixin",
+    "accessor.LightTextureAccessor",
+    "accessor.VertexBufferAccessor"
   ]
 }
