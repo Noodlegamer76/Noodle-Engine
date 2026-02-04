@@ -1,8 +1,8 @@
 package com.noodlegamer76.engine.core.component;
 
 import com.noodlegamer76.engine.NoodleEngine;
-import com.noodlegamer76.engine.core.component.components.GltfRenderer;
 import com.noodlegamer76.engine.core.component.components.ModelRenderer;
+import com.noodlegamer76.engine.core.component.components.RigidBody;
 import com.noodlegamer76.engine.entity.GameObject;
 import com.noodlegamer76.engine.event.NoodleEngineRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -15,8 +15,8 @@ public class InitComponents {
     public static final RegistryObject<ComponentType<?>> MODEL_RENDERER = COMPONENT_TYPES.register("model_renderer",
             () -> new ComponentType<>(ModelRenderer::new));
 
-    public static final RegistryObject<ComponentType<?>> GLTF_RENDERER = COMPONENT_TYPES.register("gltf_renderer",
-            () -> new ComponentType<>(GltfRenderer::new));
+    public static final RegistryObject<ComponentType<?>> RIGID_BODY = COMPONENT_TYPES.register("rigid_body",
+            () -> new ComponentType<>(RigidBody::new));
 
     @FunctionalInterface
     public interface ComponentSupplier<T extends Component> {

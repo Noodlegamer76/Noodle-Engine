@@ -19,10 +19,14 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.List;
 
@@ -67,25 +71,23 @@ public class ModelRenderer extends Component implements RenderableComponent {
     }
 
     @Override
-    public void render(GameObject entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+    public void render(GameObject entity, float entityYaw, float partialTick,
+                       PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+
         if (Minecraft.getInstance().level == null || bakedModel == null) {
             return;
         }
-        poseStack.pushPose();
-        poseStack.translate(-0.5, 0, -0.5);
 
-        PoseStack.Pose pose = poseStack.last();
         Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(
-                pose,
-                bufferSource.getBuffer(RenderType.translucent()),
+                poseStack.last(),
+                bufferSource.getBuffer(RenderType.cutout()),
                 null,
                 bakedModel,
-                1, 1, 1,
-                packedLight, 0,
+                1f, 1f, 1f,
+                packedLight,
+                0,
                 ModelData.EMPTY,
-                RenderType.translucent()
-                );
-
-        poseStack.popPose();
+                null
+        );
     }
 }

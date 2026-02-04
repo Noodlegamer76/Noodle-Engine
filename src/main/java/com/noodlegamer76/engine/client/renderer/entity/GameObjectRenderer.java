@@ -1,13 +1,20 @@
 package com.noodlegamer76.engine.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.noodlegamer76.engine.core.component.Component;
 import com.noodlegamer76.engine.core.component.components.RenderableComponent;
 import com.noodlegamer76.engine.entity.GameObject;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class GameObjectRenderer extends EntityRenderer<GameObject> {
     public static final ResourceLocation DIRT = ResourceLocation.withDefaultNamespace("textures/block/dirt.png");
@@ -18,7 +25,30 @@ public class GameObjectRenderer extends EntityRenderer<GameObject> {
 
     @Override
     public void render(GameObject entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        poseStack = new PoseStack();
         poseStack.pushPose();
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        Vec3 cameraPos = camera.getPosition();
+
+        poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        poseStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
+        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
+        Vector3f lv = entity.getLinearVelocity();
+
+        Vector3f physPos = entity.getPhysicsPosition();
+        Vector3f prevPos = new Vector3f((float) entity.xOld, (float) entity.yOld, (float) entity.zOld);
+        Vector3f position = new Vector3f();
+        position.x = Mth.lerp(partialTick, prevPos.x, physPos.x);
+        position.y = Mth.lerp(partialTick, prevPos.y, physPos.y);
+        position.z = Mth.lerp(partialTick, prevPos.z, physPos.z);
+
+        poseStack.translate(position.x, position.y, position.z);
+
+        Quaternionf interpolatedRot = new Quaternionf(entity.prevRotation).slerp(entity.getRotation(), partialTick);
+        poseStack.mulPose(interpolatedRot);
+
+        poseStack.translate(-0.5f, -0.5f, -0.5f);
 
         for (Component component: entity.getComponentManager().getComponents().values()) {
             if (component instanceof RenderableComponent renderable) {
