@@ -79,8 +79,6 @@ public class GameObject extends Entity {
         super.tick();
         prevRotation.set(entityData.get(ROTATION));
         componentManager.tick(this);
-
-
     }
 
     @Override

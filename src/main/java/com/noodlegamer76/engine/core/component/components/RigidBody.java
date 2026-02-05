@@ -12,11 +12,18 @@ import com.noodlegamer76.engine.physics.snapshot.PhysicsLevelSnapshot;
 import com.noodlegamer76.engine.physics.snapshot.RenderBody;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.ode4j.math.DVector3;
+import org.ode4j.math.DVector3C;
+import org.ode4j.ode.DBody;
 
 public class RigidBody extends Component {
     private BodyHandle handle;
@@ -32,7 +39,7 @@ public class RigidBody extends Component {
     public BodyHandle getHandle() {
         return handle;
     }
-
+    
     @Override
     public void tick() {
         if (gameObject.level() instanceof ServerLevel serverLevel) {
@@ -41,7 +48,6 @@ public class RigidBody extends Component {
             PhysicsLevelSnapshot.SnapshotPair pair = PhysicsEngine.getInstance().getLastSnapshot(serverLevel);
 
             if (pair == null) return;
-
 
             RenderBody currentBody = pair.current.get(getHandle());
 

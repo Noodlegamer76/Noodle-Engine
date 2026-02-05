@@ -2,13 +2,20 @@ package com.noodlegamer76.engine.physics;
 
 import com.noodlegamer76.engine.physics.snapshot.BodyHandle;
 import com.noodlegamer76.engine.physics.snapshot.PhysicsLevelSnapshot;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-import org.ode4j.math.DQuaternionC;
-import org.ode4j.math.DVector3C;
-import org.ode4j.ode.*;
+import org.ode4j.ode.DBody;
+import org.ode4j.ode.DGeom;
+import org.ode4j.ode.DMass;
+import org.ode4j.ode.OdeHelper;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

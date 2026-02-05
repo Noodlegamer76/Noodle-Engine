@@ -6,6 +6,9 @@ public class SyncedVar<T> {
     private final SyncedVarOwner owner;
 
     public SyncedVar(SyncedVarOwner owner, T value, GameObjectSerializer<T> serializer) {
+        if (value == null) {
+            throw new NullPointerException("SyncedVar default value can't be null");
+        }
         this.serializer = serializer;
         this.owner = owner;
         this.value = value;

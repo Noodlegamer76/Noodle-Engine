@@ -36,12 +36,7 @@ public class GameObjectRenderer extends EntityRenderer<GameObject> {
 
         Vector3f lv = entity.getLinearVelocity();
 
-        Vector3f physPos = entity.getPhysicsPosition();
-        Vector3f prevPos = new Vector3f((float) entity.xOld, (float) entity.yOld, (float) entity.zOld);
-        Vector3f position = new Vector3f();
-        position.x = Mth.lerp(partialTick, prevPos.x, physPos.x);
-        position.y = Mth.lerp(partialTick, prevPos.y, physPos.y);
-        position.z = Mth.lerp(partialTick, prevPos.z, physPos.z);
+        Vec3 position = entity.getPosition(partialTick);
 
         poseStack.translate(position.x, position.y, position.z);
 

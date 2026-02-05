@@ -10,12 +10,12 @@
     "Position",
     "Color",
     "UV0",
-    "Normal",
     "NormalUV",
     "MetallicUV",
     "RoughnessUV",
     "AoUV",
     "EmissiveUV",
+    "Normal",
     "JointIndices",
     "JointWeights"
   ],

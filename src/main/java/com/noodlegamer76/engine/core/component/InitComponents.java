@@ -1,6 +1,7 @@
 package com.noodlegamer76.engine.core.component;
 
 import com.noodlegamer76.engine.NoodleEngine;
+import com.noodlegamer76.engine.core.component.components.MeshRenderer;
 import com.noodlegamer76.engine.core.component.components.ModelRenderer;
 import com.noodlegamer76.engine.core.component.components.RigidBody;
 import com.noodlegamer76.engine.entity.GameObject;
@@ -17,6 +18,9 @@ public class InitComponents {
 
     public static final RegistryObject<ComponentType<?>> RIGID_BODY = COMPONENT_TYPES.register("rigid_body",
             () -> new ComponentType<>(RigidBody::new));
+
+    public static final RegistryObject<ComponentType<?>> MESH_RENDERER = COMPONENT_TYPES.register("mesh_renderer",
+            () -> new ComponentType<>(MeshRenderer::new));
 
     @FunctionalInterface
     public interface ComponentSupplier<T extends Component> {

@@ -167,8 +167,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     minecraftLibrary "org.ode4j:core:0.5.4"
-
-    //minecraftLibrary 'de.javagl:jgltf-model:2.0.4'
+    minecraftLibrary 'de.javagl:jgltf-model:2.0.4'
     //implementation fg.deobf("curse.maven:distant-horizons-508933:6387680")
 
 }

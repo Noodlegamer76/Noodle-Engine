@@ -3,6 +3,7 @@ package com.noodlegamer76.engine.physics;
 import com.noodlegamer76.engine.physics.snapshot.BodyHandle;
 import com.noodlegamer76.engine.physics.snapshot.PhysicsLevelSnapshot;
 import com.noodlegamer76.engine.physics.snapshot.RenderBody;
+import net.minecraft.world.level.ChunkPos;
 import org.ode4j.ode.*;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class PhysicsLevel {
         world.setGravity(0, -9.81, 0);
         world.setCFM(1e-5);
 
-        space = createHashSpace();
+        space = createSimpleSpace();
         contactGroup = createJointGroup();
 
         createPlane(space, 0, 1, 0, 0);

@@ -1,8 +1,8 @@
 package com.noodlegamer76.engine.event;
 
 import com.noodlegamer76.engine.NoodleEngine;
-import com.noodlegamer76.engine.client.ModVertexFormat;
-import com.noodlegamer76.engine.gltf.material.ShaderReference;
+import com.noodlegamer76.engine.client.ModVertexFormats;
+import com.noodlegamer76.engine.client.ShaderReference;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.RegisterShadersEvent;
@@ -20,7 +20,8 @@ public class ShaderRegistry {
 
         event.registerShader(new ShaderInstance(event.getResourceProvider(),
                         ResourceLocation.fromNamespaceAndPath(NoodleEngine.MODID, "pbr"),
-                        ModVertexFormat.GLB_PBR),
+                        ModVertexFormats.GLB_PBR),
                 (e) -> pbr.shader = e);
+
     }
 }

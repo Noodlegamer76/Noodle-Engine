@@ -1,6 +1,7 @@
 package com.noodlegamer76.engine.mixin.accessor;
 
 import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -8,5 +9,11 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface VertexBufferAccessor {
 
     @Accessor(value = "indexCount")
-    int getIndexCount();
+    int noodleEngine$getIndexCount();
+
+    @Accessor(value = "mode")
+    VertexFormat.Mode noodleEngine$getMode();
+
+    @Accessor(value = "indexType")
+    VertexFormat.IndexType noodleEngine$getIndexType();
 }

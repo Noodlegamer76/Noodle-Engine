@@ -4,15 +4,15 @@
 
 in vec3 Position;
 in vec4 Color;
-in vec2 UV0;
 in vec3 Normal;
+in vec2 UV0;
 in vec2 NormalUV;
 in vec2 MetallicUV;
 in vec2 RoughnessUV;
 in vec2 AoUV;
 in vec2 EmissiveUV;
 in vec4 JointIndices;
-in uvec4 JointWeights;
+in vec4 JointWeights;
 
 uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
@@ -39,16 +39,15 @@ out vec4 vertexColor;
 out vec4 lightColor;
 
 void main() {
-    ivec4 iWeight = ivec4(JointWeights);
-    float weightSum = iWeight.x + iWeight.y + iWeight.z + iWeight.w;
+    float weightSum = JointWeights.x + JointWeights.y + JointWeights.z + JointWeights.w;
 
     mat4 skinMat;
     if (weightSum > 0.0) {
         skinMat =
-            iWeight.x * joints[clamp(int(JointIndices.x), 0, 1023)] +
-            iWeight.y * joints[clamp(int(JointIndices.y), 0, 1023)] +
-            iWeight.z * joints[clamp(int(JointIndices.z), 0, 1023)] +
-            iWeight.w * joints[clamp(int(JointIndices.w), 0, 1023)];
+            JointWeights.x * joints[clamp(int(JointIndices.x), 0, 1023)] +
+            JointWeights.y * joints[clamp(int(JointIndices.y), 0, 1023)] +
+            JointWeights.z * joints[clamp(int(JointIndices.z), 0, 1023)] +
+            JointWeights.w * joints[clamp(int(JointIndices.w), 0, 1023)];
     } else {
         skinMat = mat4(1.0);
     }

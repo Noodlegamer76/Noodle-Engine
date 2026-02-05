@@ -1,5 +1,8 @@
 package com.noodlegamer76.engine.item;
 
+import com.noodlegamer76.engine.NoodleEngine;
+import com.noodlegamer76.engine.client.glitf.access.ModelStorage;
+import com.noodlegamer76.engine.core.component.components.MeshRenderer;
 import com.noodlegamer76.engine.core.component.components.ModelRenderer;
 import com.noodlegamer76.engine.core.component.components.RigidBody;
 import com.noodlegamer76.engine.entity.GameObject;
@@ -8,6 +11,7 @@ import com.noodlegamer76.engine.physics.PhysicsEngine;
 import com.noodlegamer76.engine.physics.snapshot.BodyHandle;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -49,29 +53,14 @@ public class TestItem extends Item {
        //    level.addFreshEntity(object);
        //}
         if (level instanceof ServerLevel serverLevel) {
-            Vec3 spawnPos = new Vec3(
-                    player.getX(),
-                    Math.max(player.getY(), 1.0),
-                    player.getZ()
-            ).add(0, 0.5, 0);
-
-            BodyHandle handle = PhysicsEngine.getInstance().testAdd(spawnPos, serverLevel);
-
             GameObject object = new GameObject(InitEntities.GAME_OBJECT.get(), level);
+            object.setPos(player.getX(), player.getY(), player.getZ());
 
-            ModelRenderer modelRenderer = new ModelRenderer(object);
-            BlockState blockState = Blocks.SPRUCE_FENCE_GATE.defaultBlockState();
-            ModelResourceLocation block = BlockModelShaper.stateToModelLocation(blockState);
+            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(NoodleEngine.MODID, "gltf/master.glb");
 
-            modelRenderer.setModel(block);
-
-            object.addComponent(modelRenderer);
-
-            RigidBody rigidBody = new RigidBody(object);
-
-            rigidBody.setHandle(handle);
-
-            object.addComponent(rigidBody);
+            MeshRenderer renderer = new MeshRenderer(object);
+            renderer.setModelLocation(location);
+            object.addComponent(renderer);
 
             object.setNoGravity(true);
 
