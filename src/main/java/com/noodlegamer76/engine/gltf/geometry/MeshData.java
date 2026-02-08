@@ -3,6 +3,7 @@ package com.noodlegamer76.engine.gltf.geometry;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.noodlegamer76.engine.gltf.McGltf;
 import com.noodlegamer76.engine.gltf.material.McMaterial;
+import com.noodlegamer76.engine.gltf.node.Node;
 import de.javagl.jgltf.model.MeshModel;
 import de.javagl.jgltf.model.MeshPrimitiveModel;
 import de.javagl.jgltf.model.SkinModel;
@@ -17,6 +18,7 @@ public class MeshData {
     private final Map<McMaterial, GltfVbo> primitiveBuffers = new HashMap<>();
     private final MeshModel meshModel;
     private final McGltf gltf;
+    private Node node;
     private SkinModel skin;
 
     public MeshData(MeshModel meshModel, McGltf gltf) {
@@ -37,6 +39,14 @@ public class MeshData {
             primitives.put(material, new ArrayList<>());
         }
         primitives.get(material).add(primitive);
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
     }
 
     public void addPrimitiveBuffer(McMaterial material, GltfVbo buffer) {

@@ -11,8 +11,9 @@ import java.util.Map;
 
 public class MaterialBatch {
     private final Map<McMaterial, Map<GltfVbo, List<RenderableBuffer>>> buffers = new HashMap<>();
+    private final List<RenderableMesh> meshes = new ArrayList<>();
 
-    public void add(McMaterial material, RenderableBuffer buffer) {
+    public void render(McMaterial material, RenderableBuffer buffer) {
         if (!buffers.containsKey(material)) {
             buffers.put(material, new HashMap<>());
         }
@@ -22,19 +23,16 @@ public class MaterialBatch {
         buffers.get(material).get(buffer.getVertexBuffer()).add(buffer);
     }
 
-    public void add(RenderableMesh mesh) {
-        for (RenderableBuffer buffer : mesh.getBuffers()) {
-            add(buffer.getVertexBuffer().getMaterial(), buffer);
+    public void remove(RenderableBuffer buffer) {
+        McMaterial material = buffer.getVertexBuffer().getMaterial();
+        Map<GltfVbo, List<RenderableBuffer>> buffers = this.buffers.get(material);
+        if (buffers != null && buffers.containsKey(buffer.getVertexBuffer())) {
+            buffers.get(buffer.getVertexBuffer()).remove(buffer);
         }
     }
 
-    public void remove(RenderableBuffer buffer) {
-        McMaterial mat = buffer.getVertexBuffer().getMaterial();
-        Map<GltfVbo, List<RenderableBuffer>> map = buffers.get(mat);
-        map.get(buffer.getVertexBuffer()).remove(buffer);
-    }
-
     public void remove(RenderableMesh mesh) {
+        meshes.remove(mesh);
         for (RenderableBuffer buffer : mesh.getBuffers()) {
             remove(buffer);
         }
@@ -43,6 +41,14 @@ public class MaterialBatch {
     @Nullable
     public List<RenderableBuffer> getBuffers(McMaterial material, GltfVbo buffer) {
         return buffers.get(material).get(buffer);
+    }
+
+    public List<RenderableMesh> getMeshes() {
+        return meshes;
+    }
+
+    public void add(RenderableMesh mesh) {
+        meshes.add(mesh);
     }
 
     public void remove(McMaterial material) {

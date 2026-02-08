@@ -1,16 +1,24 @@
 package com.noodlegamer76.engine.client.renderer.gltf;
 
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.animation.animation.SingleAnimationPlayer;
+import com.noodlegamer76.engine.gltf.animation.skins.LoadSkins;
 import com.noodlegamer76.engine.gltf.geometry.MeshData;
+import com.noodlegamer76.engine.gltf.node.Node;
+import de.javagl.jgltf.model.NodeModel;
 import org.joml.Matrix4f;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class RenderableMesh {
     private final List<RenderableBuffer> buffers = new ArrayList<>();
     private final MeshData meshData;
     private final McGltf gltf;
-    private Matrix4f modelViewMatrix;
+    private List<Matrix4f> jointMatrices;
+    private List<NodeModel> joints = new ArrayList<>();
+    private Matrix4f modelMatrix;
+    private SingleAnimationPlayer animationPlayer;
 
     public RenderableMesh(MeshData meshData) {
         this.meshData = meshData;
@@ -30,18 +38,50 @@ public class RenderableMesh {
         buffers.add(buffer);
     }
 
+    public void buildJoints() {
+        if (meshData.getSkin() == null) return;
+
+        this.joints = new ArrayList<>(meshData.getSkin().getJoints());
+        LoadSkins.getSkinGlobal(this);
+    }
+
+    public void update(float partialTick) {
+        buildJoints();
+        if (animationPlayer != null) {
+            animationPlayer.update(partialTick / 20);
+        }
+    }
+
+    public void setAnimationPlayer(SingleAnimationPlayer animationPlayer) {
+        this.animationPlayer = animationPlayer;
+    }
+
     public McGltf getGltf() {
         return gltf;
     }
 
-    public void setModelViewMatrix(Matrix4f modelViewMatrix) {
-        this.modelViewMatrix = modelViewMatrix;
-        for (RenderableBuffer buffer : buffers) {
-            buffer.setModelViewMatrix(modelViewMatrix);
-        }
+    public void setJointMatrices(List<Matrix4f> jointMatrices) {
+        this.jointMatrices = jointMatrices;
     }
 
-    public Matrix4f getModelViewMatrix() {
-        return modelViewMatrix;
+    @Nullable
+    public List<Matrix4f> getJointMatrices() {
+        return jointMatrices;
+    }
+
+    public List<NodeModel> getJoints() {
+        return joints;
+    }
+
+    public void setModelMatrix(Matrix4f modelMatrix) {
+        this.modelMatrix = modelMatrix;
+    }
+
+    public Matrix4f getModelMatrix() {
+        return modelMatrix;
+    }
+
+    public SingleAnimationPlayer getAnimationPlayer() {
+        return animationPlayer;
     }
 }

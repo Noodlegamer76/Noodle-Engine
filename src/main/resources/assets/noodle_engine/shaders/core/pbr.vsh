@@ -11,13 +11,25 @@ in vec2 RoughnessUV;
 in vec2 AoUV;
 in vec2 EmissiveUV;
 in vec4 JointWeights;
-in ivec4 JointIndices;
+in vec4 JointIndices;
 
-uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
 uniform vec4 baseColorFactor;
 uniform sampler2D lightTex;
 uniform int BaseInstance;
+
+layout(std430, binding = 0) buffer ModelViewBlock {
+    mat4 ModelViewMat[];
+};
+layout(std430, binding = 1) buffer LightUvBlock {
+    int LightUvData[];
+};
+layout(std430, binding = 2) buffer JointMatBlock {
+    mat4 JointMatrices[];
+};
+layout(std430, binding = 3) buffer JointOffsetBlock {
+    int InstanceOffsets[];
+};
 
 out vec2 texCoord0;
 out vec2 normalCoord;
@@ -33,20 +45,26 @@ out vec4 lightColor;
 
 void main() {
     int instanceIndex = BaseInstance + gl_InstanceID;
+    mat4 modelView = ModelViewMat[instanceIndex];
 
     int lightIndex = instanceIndex * 2;
-    ivec2 light = ivec2(15 * 15, 15 * 15);
+    ivec2 light = ivec2(LightUvData[lightIndex] * 15, LightUvData[lightIndex + 1] * 15);
 
+    int jointBase = InstanceOffsets[instanceIndex];
 
+    ivec4 iJointIndices = ivec4(JointIndices);
     float weightSum = JointWeights.x + JointWeights.y + JointWeights.z + JointWeights.w;
-    int jointSum = JointIndices.x + JointIndices.y + JointIndices.z + JointIndices.w;
+    int jointSum = iJointIndices.x + iJointIndices.y + iJointIndices.z + iJointIndices.w;
     float uvSum = NormalUV.x + NormalUV.y;
     float uv0Sum = UV0.x + UV0.y;
 
-    mat4 skinMat = mat4(1.0);
+    mat4 skinMat = JointWeights.x * JointMatrices[jointBase + iJointIndices.x];
+    skinMat += JointWeights.y * JointMatrices[jointBase + iJointIndices.y];
+    skinMat += JointWeights.z * JointMatrices[jointBase + iJointIndices.z];
+    skinMat += JointWeights.w * JointMatrices[jointBase + iJointIndices.w];
 
     vec4 pos = skinMat * vec4(Position, 1.0);
-    gl_Position = ProjMat * ModelViewMat * pos;
+    gl_Position = ProjMat * modelView * pos;
 
     texCoord0 = UV0;
     normalCoord = NormalUV;
@@ -59,6 +77,6 @@ void main() {
     vertexColor = Color;
 
     fragNormal = normalize(mat3(skinMat) * Normal);
-    fragViewPos = (ModelViewMat * pos).xyz;
+    fragViewPos = (modelView * pos).xyz;
     fragWorldPos = pos.xyz;
 }

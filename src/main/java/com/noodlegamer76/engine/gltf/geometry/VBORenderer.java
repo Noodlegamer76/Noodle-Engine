@@ -2,6 +2,7 @@ package com.noodlegamer76.engine.gltf.geometry;
 
 import com.mojang.blaze3d.vertex.*;
 import com.noodlegamer76.engine.client.ModVertexFormats;
+import com.noodlegamer76.engine.client.renderer.gltf.RenderableBuffer;
 import com.noodlegamer76.engine.gltf.McGltf;
 import com.noodlegamer76.engine.gltf.material.MaterialProperty;
 import com.noodlegamer76.engine.gltf.material.McMaterial;
@@ -95,9 +96,9 @@ public class VBORenderer {
             }
 
             vbo.setVertexCount(vertexCount);
-        }
 
-        vbo.setUsedJoints(usedJoints);
+
+        }
     }
 
     private static void renderVertex(int i, float[] pos, float[] norm, Map<Integer, float[]> uvs,
@@ -221,10 +222,10 @@ public class VBORenderer {
         bb.endVertex();
     }
 
-    @SuppressWarnings("unchecked")
     private static Vector2f getUv(Map<Integer, Vector2f> uvs, McMaterial mat, MaterialProperty<?> prop) {
         if (!mat.hasTexCoord((MaterialProperty<ResourceLocation>) prop)) return new Vector2f(0.5f, 0.5f);
         int idx = mat.getTexCoord((MaterialProperty<ResourceLocation>) prop);
         return uvs.getOrDefault(idx, uvs.getOrDefault(0, new Vector2f(0.5f, 0.5f)));
     }
+
 }

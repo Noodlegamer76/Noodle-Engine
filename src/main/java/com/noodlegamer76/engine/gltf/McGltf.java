@@ -1,7 +1,10 @@
 package com.noodlegamer76.engine.gltf;
 
+import com.noodlegamer76.engine.gltf.animation.animation.AnimationClip;
+import com.noodlegamer76.engine.gltf.animation.skins.LoadSkins;
 import com.noodlegamer76.engine.gltf.geometry.MeshData;
 import com.noodlegamer76.engine.gltf.load.*;
+import com.noodlegamer76.engine.gltf.node.Node;
 import de.javagl.jgltf.model.AccessorModel;
 import de.javagl.jgltf.model.MeshModel;
 import de.javagl.jgltf.model.NodeModel;
@@ -24,6 +27,10 @@ public class McGltf {
     private final MaterialData materialData = new MaterialData();
     private final List<MeshData> meshes = new ArrayList<>();
     private final Map<MeshModel, MeshData> meshModelToMeshData = new HashMap<>();
+    private final Map<MeshData, Node> meshToNode = new HashMap<>();
+    private final Map<NodeModel, Node> nodeModelToNode = new HashMap<>();
+    private final Map<SkinModel, Map<Node, Matrix4f>> inverseBindMatrices = new HashMap<>();
+    private final Map<String, AnimationClip> animations = new HashMap<>();
 
     public McGltf(DefaultGltfModel model, ResourceLocation location) {
         this.model = model;
@@ -36,6 +43,9 @@ public class McGltf {
         LoadTextures.loadTextures(this);
         LoadMaterials.loadMaterials(this);
         LoadMeshes.loadMeshes(this);
+        LoadNodes.loadNodes(this);
+        LoadSkins.loadSkins(this);
+        LoadAnimations.loadAnimations(this);
     }
 
     public void close() {
@@ -73,5 +83,33 @@ public class McGltf {
     public void addMesh(MeshData mesh) {
         meshes.add(mesh);
         meshModelToMeshData.put(mesh.getMeshModel(), mesh);
+    }
+
+    public Map<MeshData, Node> getMeshToNode() {
+        return meshToNode;
+    }
+
+    public void addMeshToNode(MeshData mesh, Node node) {
+        meshToNode.put(mesh, node);
+    }
+
+    public Map<MeshModel, MeshData> getMeshModelToMeshData() {
+        return meshModelToMeshData;
+    }
+
+    public Map<NodeModel, Node> getNodeModelToNode() {
+        return nodeModelToNode;
+    }
+
+    public void addNodeModelToNode(NodeModel nodeModel, Node node) {
+        nodeModelToNode.put(nodeModel, node);
+    }
+
+    public Map<String, AnimationClip> getAnimations() {
+        return animations;
+    }
+
+    public Map<SkinModel, Map<Node, Matrix4f>> getInverseBindMatrices() {
+        return inverseBindMatrices;
     }
 }

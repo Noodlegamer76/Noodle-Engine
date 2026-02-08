@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL31;
 
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.List;
 public class GltfVbo extends VertexBuffer {
     private final McMaterial material;
     private int vertexCount;
-    private List<Integer> usedJoints;
 
     public GltfVbo(Usage usage, McMaterial material) {
         super(usage);
@@ -44,11 +42,11 @@ public class GltfVbo extends VertexBuffer {
 
         bind();
 
-        int indexCount = ((VertexBufferAccessor) this).noodleEngine$getIndexCount();
-        if (indexCount > 0) {
-            GL31.glDrawElementsInstanced(GL15.GL_TRIANGLES, indexCount, GL15.GL_UNSIGNED_INT, 0L, instanceCount);
+        VertexBufferAccessor accessor = ((VertexBufferAccessor) this);
+        if (accessor.noodleEngine$getIndexCount() > 0) {
+            GL31.glDrawElementsInstanced(accessor.noodleEngine$getMode().asGLMode, accessor.noodleEngine$getIndexCount(), accessor.noodleEngine$getIndexType().asGLType, 0L, instanceCount);
         } else {
-            GL31.glDrawArraysInstanced(GL15.GL_TRIANGLES, 0, getVertexCount(), instanceCount);
+            GL31.glDrawArraysInstanced(accessor.noodleEngine$getMode().asGLMode, 0, vertexCount, instanceCount);
         }
 
         unbind();
@@ -130,14 +128,6 @@ public class GltfVbo extends VertexBuffer {
         if (packedLightUniform != null) {
             packedLightUniform.set(packedLight);
         }
-    }
-
-    public void setUsedJoints(List<Integer> usedJoints) {
-        this.usedJoints = usedJoints;
-    }
-
-    public List<Integer> getUsedJoints() {
-        return usedJoints;
     }
 
     public McMaterial getMaterial() {
