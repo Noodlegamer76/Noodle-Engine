@@ -1,27 +1,27 @@
 package com.noodlegamer76.engine.core.component.components;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.noodlegamer76.engine.client.glitf.rendering.RenderableModel;
+import com.noodlegamer76.engine.client.renderer.gltf.GlbRenderer;
+import com.noodlegamer76.engine.client.renderer.gltf.RenderableMesh;
 import com.noodlegamer76.engine.core.component.Component;
 import com.noodlegamer76.engine.core.component.InitComponents;
 import com.noodlegamer76.engine.core.network.GameObjectSerializers;
 import com.noodlegamer76.engine.core.network.SyncedVar;
 import com.noodlegamer76.engine.entity.GameObject;
-import net.minecraft.client.renderer.LightTexture;
+import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.geometry.MeshData;
+import com.noodlegamer76.engine.gltf.load.ModelStorage;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import org.joml.Vector3f;
+import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MeshRenderer extends Component implements RenderableComponent {
     private final SyncedVar<ResourceLocation> modelLocation = new SyncedVar<>(this, ResourceLocation.fromNamespaceAndPath("", ""), GameObjectSerializers.RESOURCE_LOCATION);
-    private RenderableModel model;
+    private final List<RenderableMesh> meshes = new ArrayList<>();
 
     public MeshRenderer(GameObject gameObject) {
         super(InitComponents.MESH_RENDERER, gameObject);
@@ -44,8 +44,17 @@ public class MeshRenderer extends Component implements RenderableComponent {
         modelLocation.setValue(ResourceLocation.parse(tag.getString("model")), true);
     }
 
-    public RenderableModel getModel() {
-        return model;
+    public List<RenderableMesh> getMeshes() {
+        return meshes;
+    }
+
+    @Override
+    public void onRemoved(Level level) {
+        if (level.isClientSide) {
+            for (RenderableMesh mesh : meshes) {
+                GlbRenderer.getBatch().remove(mesh);
+            }
+        }
     }
 
     public ResourceLocation getModelLocation() {
@@ -58,16 +67,20 @@ public class MeshRenderer extends Component implements RenderableComponent {
 
     @Override
     public void render(GameObject entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-        if (model == null || modelLocation.getValue() == null) {
-            model = new RenderableModel(modelLocation.getValue());
+        if (meshes.isEmpty() && modelLocation.getValue() != null) {
+            McGltf model = ModelStorage.getModel(modelLocation.getValue());
+            if (model != null) {
+
+                for (MeshData meshData : model.getMeshes()) {
+                    RenderableMesh renderableMesh = GlbRenderer.createMesh(meshData, poseStack, packedLight);
+                    meshes.add(renderableMesh);
+                }
+            }
         }
 
-        model.setActiveAnimation(0);
-        poseStack.pushPose();
-
-        poseStack.scale(0.075f / 5, 0.075f / 5, 0.075f / 5);
-
-        model.renderSingleModel(poseStack, partialTick, packedLight);
-        poseStack.popPose();
+        for (RenderableMesh mesh : meshes) {
+            mesh.setModelViewMatrix(poseStack.last().pose());
+            GlbRenderer.addMesh(mesh);
+        }
     }
 }

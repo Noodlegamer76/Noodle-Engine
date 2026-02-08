@@ -1,16 +1,10 @@
 package com.noodlegamer76.engine.item;
 
 import com.noodlegamer76.engine.NoodleEngine;
-import com.noodlegamer76.engine.client.glitf.access.ModelStorage;
+import com.noodlegamer76.engine.client.renderer.gltf.GlbRenderer;
 import com.noodlegamer76.engine.core.component.components.MeshRenderer;
-import com.noodlegamer76.engine.core.component.components.ModelRenderer;
-import com.noodlegamer76.engine.core.component.components.RigidBody;
 import com.noodlegamer76.engine.entity.GameObject;
 import com.noodlegamer76.engine.entity.InitEntities;
-import com.noodlegamer76.engine.physics.PhysicsEngine;
-import com.noodlegamer76.engine.physics.snapshot.BodyHandle;
-import net.minecraft.client.renderer.block.BlockModelShaper;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -21,8 +15,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class TestItem extends Item {
@@ -53,18 +45,21 @@ public class TestItem extends Item {
        //    level.addFreshEntity(object);
        //}
         if (level instanceof ServerLevel serverLevel) {
-            GameObject object = new GameObject(InitEntities.GAME_OBJECT.get(), level);
-            object.setPos(player.getX(), player.getY(), player.getZ());
+            for (int i = 0; i < 1; i++) {
+                Vec3 offset = new Vec3((Math.random() - 0.5) * 7, (Math.random() - 0.5) * 7, (Math.random() - 0.5) * 7);
+                GameObject object = new GameObject(InitEntities.GAME_OBJECT.get(), level);
+                object.setPos(player.getX() + offset.x, player.getY() + offset.y, player.getZ() + offset.z);
 
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(NoodleEngine.MODID, "gltf/master.glb");
+                ResourceLocation location = ResourceLocation.fromNamespaceAndPath(NoodleEngine.MODID, "gltf/truck.glb");
 
-            MeshRenderer renderer = new MeshRenderer(object);
-            renderer.setModelLocation(location);
-            object.addComponent(renderer);
+                MeshRenderer renderer = new MeshRenderer(object);
+                renderer.setModelLocation(location);
+                object.addComponent(renderer);
 
-            object.setNoGravity(true);
+                object.setNoGravity(true);
 
-            level.addFreshEntity(object);
+                level.addFreshEntity(object);
+            }
         }
 
         return super.use(level, player, usedHand);

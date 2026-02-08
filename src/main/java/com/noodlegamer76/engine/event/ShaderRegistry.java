@@ -2,7 +2,7 @@ package com.noodlegamer76.engine.event;
 
 import com.noodlegamer76.engine.NoodleEngine;
 import com.noodlegamer76.engine.client.ModVertexFormats;
-import com.noodlegamer76.engine.client.ShaderReference;
+import com.noodlegamer76.engine.gltf.material.ShaderReference;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.RegisterShadersEvent;
