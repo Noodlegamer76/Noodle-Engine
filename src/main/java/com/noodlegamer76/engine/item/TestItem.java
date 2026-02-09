@@ -51,7 +51,7 @@ public class TestItem extends Item {
                 GameObject object = new GameObject(InitEntities.GAME_OBJECT.get(), level);
                 object.setPos(player.getX() + offset.x, player.getY() + offset.y, player.getZ() + offset.z);
 
-                ResourceLocation location = ResourceLocation.fromNamespaceAndPath(NoodleEngine.MODID, "gltf/miku.glb");
+                ResourceLocation location = ResourceLocation.fromNamespaceAndPath(NoodleEngine.MODID, "gltf/master.glb");
 
                 MeshRenderer renderer = new MeshRenderer(object);
                 renderer.setModelLocation(location);

@@ -3,6 +3,8 @@ package com.noodlegamer76.engine.gltf.animation.skins;
 import com.noodlegamer76.engine.client.renderer.gltf.GlbRenderer;
 import com.noodlegamer76.engine.client.renderer.gltf.RenderableBuffer;
 import com.noodlegamer76.engine.client.renderer.gltf.RenderableMesh;
+import com.noodlegamer76.engine.gltf.geometry.GltfVbo;
+import com.noodlegamer76.engine.gltf.material.McMaterial;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL15;
@@ -39,40 +41,27 @@ public class SkinSsbo {
     public void build() {
         skinMatrices.clear();
         startIndices.clear();
-
-        List<RenderableMesh> meshes = GlbRenderer.getBatch().getMeshes();
-        Map<RenderableMesh, Integer> meshStarts = new HashMap<>();
-
         int matrixOffset = 0;
-
-        for (RenderableMesh mesh : meshes) {
-            List<Matrix4f> joints = mesh.getJointMatrices();
-            if (joints == null || joints.isEmpty()) {
-                meshStarts.put(mesh, 0);
-                continue;
-            }
-
-            meshStarts.put(mesh, matrixOffset);
-
-            for (Matrix4f m : joints) {
-                if (matrixOffset >= MAX_MATRICES) break;
-
-                float[] arr = new float[16];
-                m.get(arr);
-                skinMatrices.put(arr);
-                matrixOffset++;
-            }
-        }
 
         for (RenderableBuffer buffer : GlbRenderer.getMatrixSsbo().getBuffers()) {
             RenderableMesh mesh = buffer.getMesh();
-            startIndices.put(meshStarts.getOrDefault(mesh, 0));
+            List<Matrix4f> joints = mesh.getJointMatrices();
+
+            if (joints == null || joints.isEmpty()) {
+                startIndices.put(0);
+                continue;
+            }
+
+            startIndices.put(matrixOffset);
+
+            for (Matrix4f m : joints) {
+                if (matrixOffset >= MAX_MATRICES) break;
+                m.get(skinMatrices);
+                matrixOffset++;
+            }
         }
-
         upload();
-
     }
-
 
     private void upload() {
         int matricesCount = Math.min(skinMatrices.position() / 16, MAX_MATRICES);

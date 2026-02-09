@@ -63,6 +63,8 @@ public class RenderLevelEvents {
             McMaterial material = batchEntry.getKey();
             Map<GltfVbo, List<RenderableBuffer>> vbos = batchEntry.getValue();
 
+            ShaderInstance shader = material.getShaderRef().shader;
+            Uniform baseInstanceUniform = shader.getUniform("BaseInstance");
 
             material.bind();
 
@@ -75,6 +77,13 @@ public class RenderLevelEvents {
 
                 GltfVbo vbo = vboEntry.getKey();
                 vbo.bind();
+
+                RenderableBuffer first = vboEntry.getValue().get(0);
+                int baseInstance = matrixManager.getInstanceIndex(first);
+
+                if (baseInstanceUniform != null) {
+                    baseInstanceUniform.set(baseInstance);
+                }
 
                 vbo.instanceDraw(vboEntry.getValue().size());
             }

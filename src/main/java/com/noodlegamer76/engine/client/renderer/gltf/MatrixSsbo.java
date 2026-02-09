@@ -20,6 +20,7 @@ public class MatrixSsbo {
     private static final int MAX_MATRICES = 8192;
     private static final Matrix4f IDENTITY = new Matrix4f().identity();
     private final Map<RenderableBuffer, Matrix4f> bufferToMatrix = new HashMap<>();
+    private final Map<RenderableBuffer, Integer> instanceIndices = new HashMap<>();
 
     public MatrixSsbo() {
         ssboId = GL15.glGenBuffers();
@@ -35,6 +36,7 @@ public class MatrixSsbo {
     public void upload(PoseStack poseStack) {
         bufferOffsets.clear();
         bufferToMatrix.clear();
+        instanceIndices.clear();
         buffers.clear();
 
         Map<GltfVbo, Integer> offsets = new HashMap<>();
@@ -62,7 +64,10 @@ public class MatrixSsbo {
                     }
                     matrices.add(modelView);
                     bufferToMatrix.put(renderableBuffer, modelView);
+                    int index = buffers.size();
                     this.buffers.add(renderableBuffer);
+                    instanceIndices.put(renderableBuffer, index);
+
                 }
             }
         });
@@ -117,5 +122,13 @@ public class MatrixSsbo {
 
     public List<RenderableBuffer> getBuffers() {
         return buffers;
+    }
+
+    public Map<RenderableBuffer, Integer> getInstanceIndices() {
+        return instanceIndices;
+    }
+
+    public int getInstanceIndex(RenderableBuffer buffer) {
+        return instanceIndices.get(buffer);
     }
 }

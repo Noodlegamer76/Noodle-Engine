@@ -4,13 +4,10 @@ import com.noodlegamer76.engine.gltf.geometry.GltfVbo;
 import com.noodlegamer76.engine.gltf.material.McMaterial;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MaterialBatch {
-    private final Map<McMaterial, Map<GltfVbo, List<RenderableBuffer>>> buffers = new HashMap<>();
+    private final Map<McMaterial, Map<GltfVbo, List<RenderableBuffer>>> buffers = new LinkedHashMap<>();
     private final List<RenderableMesh> meshes = new ArrayList<>();
 
     public void render(McMaterial material, RenderableBuffer buffer) {

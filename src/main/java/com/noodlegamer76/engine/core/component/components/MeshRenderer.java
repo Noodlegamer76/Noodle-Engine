@@ -112,7 +112,7 @@ public class MeshRenderer extends Component implements RenderableComponent {
     public void render(GameObject entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         for (RenderableMesh mesh: meshes) {
             if (mesh.getAnimationPlayer() == null) {
-                mesh.setAnimationPlayer(new SingleAnimationPlayer(mesh, (AnimationClip) Arrays.stream(mesh.getGltf().getAnimations().values().toArray()).toArray()[0]));
+                //mesh.setAnimationPlayer(new SingleAnimationPlayer(mesh, (AnimationClip) Arrays.stream(mesh.getGltf().getAnimations().values().toArray()).toArray()[0]));
             }
         }
     }
