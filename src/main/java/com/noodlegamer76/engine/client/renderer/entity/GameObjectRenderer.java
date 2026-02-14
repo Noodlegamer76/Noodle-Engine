@@ -21,6 +21,8 @@ public class GameObjectRenderer extends EntityRenderer<GameObject> {
 
     public GameObjectRenderer(EntityRendererProvider.Context pContext) {
         super(pContext);
+        shadowRadius = 0.5F;
+        shadowStrength = 0.5F;
     }
 
     @Override

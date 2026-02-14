@@ -12,7 +12,7 @@ public class MaterialBatch {
 
     public void render(McMaterial material, RenderableBuffer buffer) {
         if (!buffers.containsKey(material)) {
-            buffers.put(material, new HashMap<>());
+            buffers.put(material, new LinkedHashMap<>());
         }
         if (!buffers.get(material).containsKey(buffer.getVertexBuffer())) {
             buffers.get(material).put(buffer.getVertexBuffer(), new ArrayList<>());

@@ -18,7 +18,7 @@ public class LoadNodes {
             nodeModel.computeLocalTransform(localArr);
             Matrix4f localMatrix = new Matrix4f().set(localArr);
 
-            Node node = new Node(new Matrix4f(localMatrix), localMatrix, nodeModel);
+            Node node = new Node(localMatrix, nodeModel);
             gltf.addNodeModelToNode(nodeModel, node);
 
             List<MeshModel> meshModels = nodeModel.getMeshModels();
@@ -43,18 +43,11 @@ public class LoadNodes {
 
         for (NodeModel nodeModel : gltf.getModel().getNodeModels()) {
             Node node = gltf.getNodeModelToNode().get(nodeModel);
-            updateGlobalTransform(node);
+            float[] globalArr = new float[16];
+            nodeModel.computeGlobalTransform(globalArr);
+            Matrix4f globalMatrix = new Matrix4f().set(globalArr);
+            node.setGlobal(globalMatrix);
         }
     }
 
-    /**
-     * Recursively calculates the world space matrix: Global = ParentGlobal * Local
-     */
-    private static void updateGlobalTransform(Node node) {
-        if (node.getParent() != null) {
-            node.getGlobal().set(node.getParent().getGlobal()).mul(node.getLocal());
-        } else {
-            node.getGlobal().set(node.getLocal());
-        }
-    }
 }

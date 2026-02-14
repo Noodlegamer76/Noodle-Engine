@@ -14,25 +14,29 @@ public class AnimationSampler {
     private static final Vector3f scratchVector = new Vector3f();
 
     public static Matrix4f sample(AnimationClip clip, Node node, float time) {
-        List<AnimationTrack> tracks = clip.getNodeTrackMap().getOrDefault(node, new ArrayList<>());
+        Matrix4f result = new Matrix4f(node.getLocal());
+
+        List<AnimationTrack> tracks = clip.getNodeTrackMap().get(node);
+
+        if (tracks == null || tracks.isEmpty()) {
+            return result;
+        }
 
         Vector3f translation = new Vector3f();
         Quaternionf rotation = new Quaternionf();
-        Vector3f scale = new Vector3f(1.0f);
+        Vector3f scale = new Vector3f();
+
+        result.getTranslation(translation);
+        result.rotate(rotation);
+        result.getScale(scale);
 
         for (AnimationTrack track : tracks) {
-            if (track.getPath().equals("translation")) {
-                translation.set(sampleVector(track, time));
-            }
-            if (track.getPath().equals("rotation")) {
-                rotation.set(sampleRotation(track, time));
-            }
-            if (track.getPath().equals("scale")) {
-                scale.set(sampleVector(track, time));
-            }
+            if (track.getPath().equals("translation")) translation.set(sampleVector(track, time));
+            if (track.getPath().equals("rotation")) rotation.set(sampleRotation(track, time));
+            if (track.getPath().equals("scale")) scale.set(sampleVector(track, time));
         }
 
-        return new Matrix4f().translationRotateScale(translation, rotation, scale);
+        return result.translationRotateScale(translation, rotation, scale);
     }
 
     public static Vector3f sampleVector(AnimationTrack track, float time) {

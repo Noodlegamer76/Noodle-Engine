@@ -23,7 +23,6 @@ public class RenderableMesh {
     public RenderableMesh(MeshData meshData) {
         this.meshData = meshData;
         this.gltf = meshData.getGltf();
-
     }
 
     public List<RenderableBuffer> getBuffers() {
@@ -46,10 +45,10 @@ public class RenderableMesh {
     }
 
     public void update(float partialTick) {
-        buildJoints();
         if (animationPlayer != null) {
-            animationPlayer.update(partialTick / 20);
+            animationPlayer.update(partialTick / 20 / 2);
         }
+        buildJoints();
     }
 
     public void setAnimationPlayer(SingleAnimationPlayer animationPlayer) {

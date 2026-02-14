@@ -47,7 +47,7 @@ public class TestItem extends Item {
        //}
         if (level instanceof ServerLevel serverLevel) {
             for (int i = 0; i < 1; i++) {
-                Vec3 offset = new Vec3((Math.random() - 0.5) * 1, (Math.random() - 0.5) * 1, (Math.random() - 0.5) * 1);
+                Vec3 offset = new Vec3((Math.random() - 0.5) * 1, (Math.random() - 0.5) * 0, (Math.random() - 0.5) * 1);
                 GameObject object = new GameObject(InitEntities.GAME_OBJECT.get(), level);
                 object.setPos(player.getX() + offset.x, player.getY() + offset.y, player.getZ() + offset.z);
 
@@ -58,7 +58,7 @@ public class TestItem extends Item {
                 object.addComponent(renderer);
 
                 object.setNoGravity(true);
-                object.setScale(new Vector3f(1, 1, 1));
+                object.setScale(new Vector3f(0.65f, 0.65f, 0.65f));
 
                 level.addFreshEntity(object);
             }

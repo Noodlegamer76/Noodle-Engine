@@ -32,22 +32,14 @@ public class SingleAnimationPlayer {
 
     public void calculateAnimatedGlobalTransforms() {
         if (mesh.getMeshData().getSkin() == null) return;
-        List<NodeModel> jointNodeModels = mesh.getMeshData().getSkin().getJoints();
 
-        Set<Node> processedNodes = new HashSet<>();
+        for (NodeModel rootModel : mesh.getGltf().getModel().getSceneModels().get(0).getNodeModels()) {
+            Node rootNode = mesh.getGltf().getNodeModelToNode().get(rootModel);
 
-        for (NodeModel jointModel : jointNodeModels) {
-
-            Node rootNode = mesh.getGltf().getNodeModelToNode().get(jointModel);
-            while (rootNode.getParent() != null) {
-                rootNode = rootNode.getParent();
-            }
-
-            if (processedNodes.add(rootNode)) {
-                calculateRecursive(rootNode, new Matrix4f().identity());
-            }
+            calculateRecursive(rootNode, new Matrix4f().identity());
         }
     }
+
     private void calculateRecursive(Node node, Matrix4f parentAnimatedGlobal) {
         Matrix4f localAnimated = AnimationSampler.sample(clip, node, currentTimeSeconds);
 
@@ -62,7 +54,7 @@ public class SingleAnimationPlayer {
     }
 
     public Matrix4f getAnimatedSkinMatrix(Node node) {
-        return animatedSkinMatrices.getOrDefault(node, new Matrix4f().identity());
+        return animatedSkinMatrices.getOrDefault(node, new Matrix4f());
     }
 
     public Matrix4f sample(Node node) {

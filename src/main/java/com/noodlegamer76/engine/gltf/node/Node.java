@@ -13,8 +13,7 @@ public class Node {
     private Matrix4f local;
     private final NodeModel nodeModel;
 
-    public Node(Matrix4f global, Matrix4f local, NodeModel nodeModel) {
-        this.global = global;
+    public Node(Matrix4f local, NodeModel nodeModel) {
         this.local = local;
         this.nodeModel = nodeModel;
     }

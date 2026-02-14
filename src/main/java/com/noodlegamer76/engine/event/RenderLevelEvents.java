@@ -20,6 +20,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL31;
 import org.lwjgl.opengl.GL43;
 
 import java.util.List;
@@ -57,7 +58,11 @@ public class RenderLevelEvents {
         GlbRenderer.getLightUvSsbo().upload();
         skinsManager.build();
 
+        GL43.glMemoryBarrier(GL43.GL_SHADER_STORAGE_BARRIER_BIT);
+
         poseStack.popPose();
+
+        int baseInstance = 0;
 
         for (Map.Entry<McMaterial, Map<GltfVbo, List<RenderableBuffer>>> batchEntry : batch.getBuffers().entrySet()) {
             McMaterial material = batchEntry.getKey();
@@ -78,14 +83,13 @@ public class RenderLevelEvents {
                 GltfVbo vbo = vboEntry.getKey();
                 vbo.bind();
 
-                RenderableBuffer first = vboEntry.getValue().get(0);
-                int baseInstance = matrixManager.getInstanceIndex(first);
-
+                int instances = vboEntry.getValue().size();
                 if (baseInstanceUniform != null) {
                     baseInstanceUniform.set(baseInstance);
+                    baseInstance += instances;
                 }
 
-                vbo.instanceDraw(vboEntry.getValue().size());
+                vbo.instanceDraw(instances);
             }
         }
 

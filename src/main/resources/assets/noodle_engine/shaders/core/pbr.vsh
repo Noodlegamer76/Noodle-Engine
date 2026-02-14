@@ -53,18 +53,17 @@ void main() {
     int jointBase = InstanceOffsets[instanceIndex];
 
     ivec4 iJointIndices = ivec4(JointIndices);
-
-    float wSum = dot(JointWeights, vec4(1.0));
-    vec4 weights = JointWeights / max(wSum, 0.0001);
-
-    int jointSum = iJointIndices.x + iJointIndices.y + iJointIndices.z + iJointIndices.w;
+    float weightSum = JointWeights.x + JointWeights.y + JointWeights.z + JointWeights.w;
     float uvSum = NormalUV.x + NormalUV.y;
     float uv0Sum = UV0.x + UV0.y;
 
-    mat4 skinMat = weights.x * JointMatrices[jointBase + iJointIndices.x];
-    skinMat += weights.y * JointMatrices[jointBase + iJointIndices.y];
-    skinMat += weights.z * JointMatrices[jointBase + iJointIndices.z];
-    skinMat += weights.w * JointMatrices[jointBase + iJointIndices.w];
+    mat4 skinMat = mat4(1.0);
+    if (weightSum > 0.0) {
+        skinMat = JointWeights.x * JointMatrices[jointBase + iJointIndices.x];
+        skinMat += JointWeights.y * JointMatrices[jointBase + iJointIndices.y];
+        skinMat += JointWeights.z * JointMatrices[jointBase + iJointIndices.z];
+        skinMat += JointWeights.w * JointMatrices[jointBase + iJointIndices.w];
+    }
 
     vec4 pos = skinMat * vec4(Position, 1.0);
     gl_Position = ProjMat * modelView * pos;

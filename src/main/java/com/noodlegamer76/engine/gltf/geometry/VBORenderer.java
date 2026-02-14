@@ -36,7 +36,6 @@ public class VBORenderer {
     }
 
     private static void renderPrimitive(McGltf gltf, BufferBuilder bb, List<MeshPrimitiveModel> primitives, McMaterial material, GltfVbo vbo) {
-        Set<Integer> usedJointSet = new HashSet<>();
         Map<MeshPrimitiveModel, int[]> primitiveJointsMap = new HashMap<>();
         Map<MeshPrimitiveModel, float[]> primitiveWeightsMap = new HashMap<>();
 
@@ -46,27 +45,11 @@ public class VBORenderer {
 
             primitiveJointsMap.put(primitive, joints);
             primitiveWeightsMap.put(primitive, weights);
-
-            if (joints != null && weights != null) {
-                int vertexCount = joints.length / 4;
-                for (int i = 0; i < vertexCount; i++) {
-                    for (int k = 0; k < 4; k++) {
-                        if (weights[i * 4 + k] > 0f) usedJointSet.add(joints[i * 4 + k]);
-                    }
-                }
-            }
         }
-
-        List<Integer> usedJoints = new ArrayList<>(usedJointSet);
-        Collections.sort(usedJoints);
-        Map<Integer, Integer> jointRemap = new HashMap<>();
-        for (int i = 0; i < usedJoints.size(); i++) jointRemap.put(usedJoints.get(i), i);
 
         for (MeshPrimitiveModel primitive : primitives) {
             int[] joints = primitiveJointsMap.get(primitive);
             float[] weights = primitiveWeightsMap.get(primitive);
-
-            boolean skinned = joints != null && joints.length > 0 && weights != null && weights.length > 0;
 
             int[] indices = GltfAccessorUtils.getIndexArray(primitive.getIndices());
             AccessorModel posAcc = primitive.getAttributes().get("POSITION");
@@ -87,22 +70,19 @@ public class VBORenderer {
 
             if (indices != null) {
                 for (int idx : indices) {
-                    renderVertex(idx, positions, normals, uvLayers, joints, weights, jointRemap, bb, material);
+                    renderVertex(idx, positions, normals, uvLayers, joints, weights, bb, material);
                 }
             } else {
                 for (int i = 0; i < vertexCount; i++) {
-                    renderVertex(i, positions, normals, uvLayers, joints, weights, jointRemap, bb, material);
+                    renderVertex(i, positions, normals, uvLayers, joints, weights, bb, material);
                 }
             }
-
-            vbo.setVertexCount(vertexCount);
-
-
+            vbo.setVertexCount(indices != null ? indices.length : vertexCount);
         }
     }
 
     private static void renderVertex(int i, float[] pos, float[] norm, Map<Integer, float[]> uvs,
-                                     int[] rawJoints, float[] rawWeights, Map<Integer, Integer> jointRemap,
+                                     int[] rawJoints, float[] rawWeights,
                                      BufferBuilder bb, McMaterial mat) {
         float x = pos[i * 3], y = pos[i * 3 + 1], z = pos[i * 3 + 2];
         float nx = (norm != null) ? norm[i * 3] : 0f;
@@ -117,33 +97,25 @@ public class VBORenderer {
         int[] joints = new int[4];
         float[] weights = new float[4];
 
-        boolean hasJoints = rawJoints != null && rawJoints.length > i * 4 + 3;
-        boolean hasWeights = rawWeights != null && rawWeights.length > i * 4 + 3;
-
-        if (hasJoints) {
+        if (rawJoints != null && rawJoints.length > i * 4 + 3) {
             for (int j = 0; j < 4; j++) {
                 joints[j] = rawJoints[i * 4 + j];
-                if (jointRemap != null) joints[j] = jointRemap.getOrDefault((int) joints[j], 0);
             }
-        } else {
-            Arrays.fill(joints, 0);
         }
 
-        if (hasWeights) {
+        if (rawWeights != null && rawWeights.length > i * 4 + 3) {
+            float sum = 0;
             for (int j = 0; j < 4; j++) {
-                int idx = i * 4 + j;
-                weights[j] = idx < rawWeights.length ? rawWeights[idx] : 0f;
+                weights[j] = rawWeights[i * 4 + j];
+                sum += weights[j];
             }
-            float sum = weights[0] + weights[1] + weights[2] + weights[3];
             if (sum > 0f) {
                 for (int j = 0; j < 4; j++) weights[j] /= sum;
             } else {
-                weights[0] = 1f;
-                weights[1] = weights[2] = weights[3] = 0f;
+                weights[0] = 1.0f;
             }
         } else {
-            weights[0] = 1f;
-            weights[1] = weights[2] = weights[3] = 0f;
+            weights[0] = 1.0f;
         }
 
         render(bb, x, y, z, nx, ny, nz, vertexUVs, joints, weights, mat);
