@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.math.Axis;
 import com.noodlegamer76.engine.NoodleEngine;
 import com.noodlegamer76.engine.client.renderer.gltf.*;
+import com.noodlegamer76.engine.gltf.animation.animation.controller.Animator;
 import com.noodlegamer76.engine.gltf.animation.skins.SkinSsbo;
 import com.noodlegamer76.engine.gltf.geometry.GltfVbo;
 import com.noodlegamer76.engine.gltf.material.McMaterial;
@@ -23,15 +24,20 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
 import org.lwjgl.opengl.GL43;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = NoodleEngine.MODID)
 public class RenderLevelEvents {
+    private static final Set<Animator> animators = new LinkedHashSet<>();
 
     @SubscribeEvent
     public static void renderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) return;
+
+        animators.clear();
 
         MatrixSsbo matrixManager = GlbRenderer.getMatrixSsbo();
         LightUvSsbo lightUvManager = GlbRenderer.getLightUvSsbo();
@@ -40,7 +46,17 @@ public class RenderLevelEvents {
         MaterialBatch batch = GlbRenderer.getBatch();
 
         for (RenderableMesh mesh: GlbRenderer.getBatch().getMeshes()) {
-            mesh.update(event.getPartialTick());
+            if (mesh.getAnimator() != null) {
+                animators.add(mesh.getAnimator());
+            }
+        }
+
+        for (Animator animator: animators) {
+            animator.update(event.getPartialTick() / 20 / 2);
+        }
+
+        for (RenderableMesh mesh: GlbRenderer.getBatch().getMeshes()) {
+            mesh.buildJoints();
             GlbRenderer.render(mesh);
         }
 

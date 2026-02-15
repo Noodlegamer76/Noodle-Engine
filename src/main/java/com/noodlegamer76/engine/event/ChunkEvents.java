@@ -1,7 +1,6 @@
 package com.noodlegamer76.engine.event;
 
 import com.noodlegamer76.engine.NoodleEngine;
-import com.noodlegamer76.engine.physics.PhysicsEngine;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

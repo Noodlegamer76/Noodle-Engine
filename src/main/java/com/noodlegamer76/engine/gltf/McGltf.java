@@ -14,10 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 
 import java.nio.Buffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class McGltf {
     private final ResourceLocation location;
@@ -31,6 +28,7 @@ public class McGltf {
     private final Map<NodeModel, Node> nodeModelToNode = new HashMap<>();
     private final Map<SkinModel, Map<Node, Matrix4f>> inverseBindMatrices = new HashMap<>();
     private final Map<String, AnimationClip> animations = new HashMap<>();
+    private final List<Node> rootNodes = new ArrayList<>();
 
     public McGltf(DefaultGltfModel model, ResourceLocation location) {
         this.model = model;
@@ -111,5 +109,9 @@ public class McGltf {
 
     public Map<SkinModel, Map<Node, Matrix4f>> getInverseBindMatrices() {
         return inverseBindMatrices;
+    }
+
+    public List<Node> getRootNodes() {
+        return rootNodes;
     }
 }

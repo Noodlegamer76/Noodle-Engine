@@ -21,7 +21,7 @@ public class SkinSsbo {
     private final FloatBuffer skinMatrices;
     private final int startIndicesId;
     private final IntBuffer startIndices;
-    private final int MAX_MATRICES = 8192;
+    private final int MAX_MATRICES = 131072;
 
     public SkinSsbo() {
         skinMatrices = BufferUtils.createFloatBuffer(MAX_MATRICES * 16);

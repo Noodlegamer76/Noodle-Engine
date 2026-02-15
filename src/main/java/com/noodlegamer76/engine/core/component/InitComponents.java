@@ -1,11 +1,12 @@
 package com.noodlegamer76.engine.core.component;
 
 import com.noodlegamer76.engine.NoodleEngine;
+import com.noodlegamer76.engine.core.component.components.MeshAnimator;
 import com.noodlegamer76.engine.core.component.components.MeshRenderer;
 import com.noodlegamer76.engine.core.component.components.ModelRenderer;
-import com.noodlegamer76.engine.core.component.components.RigidBody;
 import com.noodlegamer76.engine.entity.GameObject;
 import com.noodlegamer76.engine.event.NoodleEngineRegistries;
+import com.noodlegamer76.engine.gltf.animation.animation.controller.Animator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -16,11 +17,11 @@ public class InitComponents {
     public static final RegistryObject<ComponentType<?>> MODEL_RENDERER = COMPONENT_TYPES.register("model_renderer",
             () -> new ComponentType<>(ModelRenderer::new));
 
-    public static final RegistryObject<ComponentType<?>> RIGID_BODY = COMPONENT_TYPES.register("rigid_body",
-            () -> new ComponentType<>(RigidBody::new));
-
     public static final RegistryObject<ComponentType<?>> MESH_RENDERER = COMPONENT_TYPES.register("mesh_renderer",
             () -> new ComponentType<>(MeshRenderer::new));
+
+    public static final RegistryObject<ComponentType<?>> ANIMATOR = COMPONENT_TYPES.register("animator",
+            () -> new ComponentType<>(MeshAnimator::new));
 
     @FunctionalInterface
     public interface ComponentSupplier<T extends Component> {

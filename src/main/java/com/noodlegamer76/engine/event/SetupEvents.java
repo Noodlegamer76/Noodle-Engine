@@ -3,7 +3,6 @@ package com.noodlegamer76.engine.event;
 import com.noodlegamer76.engine.NoodleEngine;
 import com.noodlegamer76.engine.gltf.load.GltfLoader;
 import com.noodlegamer76.engine.network.PacketHandler;
-import com.noodlegamer76.engine.physics.PhysicsEngine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -17,7 +16,6 @@ public class SetupEvents {
     public static void clientSetup(FMLCommonSetupEvent event) throws Exception {
         event.enqueueWork(PacketHandler::register);
         event.enqueueWork(() -> {
-            PhysicsEngine.getInstance();
             ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
             String modelPath = "gltf";
             GltfLoader.loadAllGlbModels(resourceManager, modelPath);

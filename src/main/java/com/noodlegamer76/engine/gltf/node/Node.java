@@ -1,5 +1,6 @@
 package com.noodlegamer76.engine.gltf.node;
 
+import com.noodlegamer76.engine.gltf.McGltf;
 import de.javagl.jgltf.model.NodeModel;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -12,10 +13,12 @@ public class Node {
     private Matrix4f global;
     private Matrix4f local;
     private final NodeModel nodeModel;
+    private final McGltf gltf;
 
-    public Node(Matrix4f local, NodeModel nodeModel) {
+    public Node(Matrix4f local, NodeModel nodeModel, McGltf gltf) {
         this.local = local;
         this.nodeModel = nodeModel;
+        this.gltf = gltf;
     }
 
     public void setParent(Node parent) {
@@ -53,5 +56,9 @@ public class Node {
 
     public Matrix4f getLocal() {
         return local;
+    }
+
+    public McGltf getGltf() {
+        return gltf;
     }
 }

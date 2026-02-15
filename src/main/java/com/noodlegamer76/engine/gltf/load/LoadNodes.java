@@ -8,7 +8,9 @@ import de.javagl.jgltf.model.NodeModel;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class LoadNodes {
     public static void loadNodes(McGltf gltf) {
@@ -18,7 +20,7 @@ public class LoadNodes {
             nodeModel.computeLocalTransform(localArr);
             Matrix4f localMatrix = new Matrix4f().set(localArr);
 
-            Node node = new Node(localMatrix, nodeModel);
+            Node node = new Node(localMatrix, nodeModel, gltf);
             gltf.addNodeModelToNode(nodeModel, node);
 
             List<MeshModel> meshModels = nodeModel.getMeshModels();
@@ -48,6 +50,16 @@ public class LoadNodes {
             Matrix4f globalMatrix = new Matrix4f().set(globalArr);
             node.setGlobal(globalMatrix);
         }
+
+        Set<Node> rootNodes = new LinkedHashSet<>();
+        for (NodeModel nodeModel : gltf.getModel().getNodeModels()) {
+            Node node = gltf.getNodeModelToNode().get(nodeModel);
+            if (node.getParent() == null) {
+                rootNodes.add(node);
+            }
+        }
+
+        gltf.getRootNodes().addAll(rootNodes);
     }
 
 }

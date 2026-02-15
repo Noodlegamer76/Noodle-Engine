@@ -1,7 +1,6 @@
 package com.noodlegamer76.engine.event;
 
 import com.noodlegamer76.engine.NoodleEngine;
-import com.noodlegamer76.engine.physics.PhysicsEngine;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -12,7 +11,6 @@ public class ServerTick {
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
-            PhysicsEngine.getInstance().tick(event.getServer());
         }
     }
 }

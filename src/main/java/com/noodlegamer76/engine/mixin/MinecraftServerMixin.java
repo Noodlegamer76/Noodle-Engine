@@ -1,6 +1,5 @@
 package com.noodlegamer76.engine.mixin;
 
-import com.noodlegamer76.engine.physics.PhysicsEngine;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -27,11 +26,5 @@ public class MinecraftServerMixin {
             at = @At(value = "TAIL")
     )
     public void createLevels(ChunkProgressListener pListener, CallbackInfo ci) {
-        PhysicsEngine engine = PhysicsEngine.getInstance();
-        for (ServerLevel level: levels.values()) {
-            engine.addLevel(level);
-        }
-
-        engine.start();
     }
 }

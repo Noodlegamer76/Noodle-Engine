@@ -2,6 +2,7 @@ package com.noodlegamer76.engine.gltf.animation.skins;
 
 import com.noodlegamer76.engine.client.renderer.gltf.RenderableMesh;
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.animation.animation.controller.Animator;
 import com.noodlegamer76.engine.gltf.geometry.MeshData;
 import com.noodlegamer76.engine.gltf.node.Node;
 import de.javagl.jgltf.model.AccessorModel;
@@ -87,15 +88,24 @@ public class LoadSkins {
                     .getNodeModelToNode()
                     .get(jointModels.get(i));
 
-            Matrix4f invBind =
-                    mesh.getGltf()
-                            .getInverseBindMatrices()
-                            .get(skin)
-                            .getOrDefault(jointNode, new Matrix4f());
+            Matrix4f invBind = mesh.getGltf()
+                    .getInverseBindMatrices()
+                    .get(skin)
+                    .get(jointNode);
 
-            Matrix4f jointGlobal = (mesh.getAnimationPlayer() != null)
-                    ? mesh.getAnimationPlayer().sample(jointNode)
-                    : jointNode.getGlobal();
+            if (invBind == null) {
+                throw new IllegalStateException("Missing inverse bind for joint: " + jointNode.getNodeModel().getName());
+            }
+
+            Matrix4f jointGlobal;
+
+            if (mesh.getAnimator() != null) {
+                Animator animator = mesh.getAnimator();
+                jointGlobal = animator.getAnimatedGlobal(jointNode);
+            } else {
+                jointGlobal = jointNode.getGlobal();
+            }
+
 
             Matrix4f skinMatrix = new Matrix4f(jointGlobal).mul(invBind);
 
@@ -104,6 +114,4 @@ public class LoadSkins {
 
         mesh.setJointMatrices(finalJointMatrices);
     }
-
-
 }
