@@ -1,14 +1,12 @@
-package com.noodlegamer76.engine.worldgen.megastructure.structure.structures.dungeon;
+package com.noodlegamer76.engine.worldgen.megastructure.structure.structures;
 
 import com.noodlegamer76.engine.worldgen.megastructure.Node;
 import com.noodlegamer76.engine.worldgen.megastructure.structure.Structure;
-import com.noodlegamer76.engine.worldgen.megastructure.structure.placers.BlockPlacer;
+import com.noodlegamer76.engine.worldgen.megastructure.structure.StructureInstance;
+import com.noodlegamer76.engine.worldgen.megastructure.structure.StructureUtils;
 import com.noodlegamer76.engine.worldgen.megastructure.structure.placers.SurfaceBlockPlacer;
-import com.noodlegamer76.engine.worldgen.megastructure.structure.structures.StructureInstance;
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import com.noodlegamer76.engine.worldgen.megastructure.structure.context.GenVar;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
@@ -22,12 +20,14 @@ public class SurfaceLayerStructure extends Structure {
     private final int zSize;
     private final BlockState state;
     private final Heightmap.Types heightmapType;
+    private final SurfaceBlockPlacer.SurfaceBlockPlacerCondition condition;
 
-    public SurfaceLayerStructure(int priority, int xSize, int zSize, BlockState state, Heightmap.Types heightmapType) {
+    public SurfaceLayerStructure(int priority, int xSize, int zSize, BlockState state, Heightmap.Types heightmapType, SurfaceBlockPlacer.SurfaceBlockPlacerCondition condition) {
         super(priority);
         this.xSize = xSize;
         this.zSize = zSize;
         this.state = state;
+        this.condition = condition;
         this.heightmapType = heightmapType;
     }
 
@@ -38,8 +38,8 @@ public class SurfaceLayerStructure extends Structure {
 
     @Override
     public void generate(FeaturePlaceContext<NoneFeatureConfiguration> ctx, Node n, RandomSource random, StructureInstance instance) {
-        int originX = random.nextIntBetweenInclusive(n.getX(), n.getX() + n.getSize());
-        int originZ = random.nextIntBetweenInclusive(n.getZ(), n.getZ() + n.getSize());
+        int originX = n.getX();
+        int originZ = n.getZ();
 
         AABB boundingBox = new AABB(
                 originX - (double) xSize / 2,
@@ -50,9 +50,14 @@ public class SurfaceLayerStructure extends Structure {
                 originZ + (double) zSize / 2
         );
 
-        boundingBox = getIntersection(ctx, boundingBox);
+        boundingBox = StructureUtils.getChunkIntersection(ctx, boundingBox);
 
-        SurfaceBlockPlacer placer = new SurfaceBlockPlacer(boundingBox, state, heightmapType);
+        SurfaceBlockPlacer placer = new SurfaceBlockPlacer(boundingBox, state, heightmapType, condition);
         instance.addPlacer(placer);
+    }
+
+    @Override
+    public List<GenVar<?>> getGenVariables() {
+        return List.of();
     }
 }

@@ -1,6 +1,6 @@
 package com.noodlegamer76.engine.worldgen.megastructure.structure.placers;
 
-import com.noodlegamer76.engine.worldgen.megastructure.structure.structures.StructureInstance;
+import com.noodlegamer76.engine.worldgen.megastructure.structure.StructureInstance;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;

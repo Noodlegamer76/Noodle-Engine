@@ -5,22 +5,20 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import org.joml.Vector2f;
 
+import java.util.Objects;
+
 public class Node {
     private final int x;
     private final int z;
     private final int level;
     private final int size;
 
-    public Node(int x, int z, int level) {
-        Vector2f origin = StructMath.getNodeOrigin(x, z, level);
-        this.x = (int) origin.x;
-        this.z = (int) origin.y;
+    public Node(int worldX, int worldZ, int level) {
+        int nodeSize = 16 << level; // 16 * 2^level
+        this.x = (worldX / nodeSize) * nodeSize;
+        this.z = (worldZ / nodeSize) * nodeSize;
         this.level = level;
-        size = StructMath.getSizeFromLevel(level);
-    }
-
-    public RandomSource getRandom(FeaturePlaceContext<NoneFeatureConfiguration> context) {
-        return StructMath.getNodeRandom(this, context);
+        this.size = nodeSize;
     }
 
     public int getLevel() {
@@ -38,4 +36,17 @@ public class Node {
     public int getZ() {
         return z;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Node node)) return false;
+        return x == node.x && z == node.z && level == node.level;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, z, level);
+    }
+
 }

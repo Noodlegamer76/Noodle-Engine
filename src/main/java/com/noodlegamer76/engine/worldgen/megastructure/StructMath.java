@@ -39,26 +39,21 @@ public class StructMath {
         return new Vector2f(originX, originY);
     }
 
-    /**
-     * Returns a deterministic RandomSource seeded for the given quadtree node.
-     * The random is based on the node's position, level, size, and the world's seed
-     * from the FeaturePlaceContext, ensuring that the same node in different worlds
-     * produces different random values.
-     *
-     * @param node the quadtree node
-     * @param ctx  the feature placement context containing the world seed
-     * @return RandomSource seeded for that node in this world
-     */
-    public static RandomSource getNodeRandom(Node node, FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
+    public static RandomSource getNodeRandom(Node node, FeaturePlaceContext<NoneFeatureConfiguration> ctx, int extra) {
         Vector2f origin = getNodeOrigin(node.getX(), node.getZ(), node.getLevel());
         int nodeSize = getSizeFromLevel(node.getLevel());
 
         long worldSeed = ctx.level().getSeed();
 
-        long seed = worldSeed ^ (((long) origin.x) * 341873128712L) ^ (((long) origin.y) * 132897987541L) ^ nodeSize;
+        long seed = worldSeed
+                ^ (((long) origin.x) * 341873128712L)
+                ^ (((long) origin.y) * 132897987541L)
+                ^ nodeSize
+                ^ (((long) extra) * 2654435761L);
 
         return RandomSource.create(seed);
     }
+
 
     /**
      * Returns the size of a quadtree node at the given level.
@@ -91,7 +86,7 @@ public class StructMath {
 
         for (int xOffset = -1; xOffset <= 1; xOffset++) {
             for (int zOffset = -1; zOffset <= 1; zOffset++) {
-                nodes.add(new Node(x + xOffset * size, z + zOffset * size, level + 1));
+                nodes.add(new Node(x + xOffset * size, z + zOffset * size, level));
             }
         }
 

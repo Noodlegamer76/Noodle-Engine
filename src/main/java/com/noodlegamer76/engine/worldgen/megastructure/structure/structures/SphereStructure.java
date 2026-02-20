@@ -2,6 +2,8 @@ package com.noodlegamer76.engine.worldgen.megastructure.structure.structures;
 
 import com.noodlegamer76.engine.worldgen.megastructure.Node;
 import com.noodlegamer76.engine.worldgen.megastructure.structure.Structure;
+import com.noodlegamer76.engine.worldgen.megastructure.structure.StructureInstance;
+import com.noodlegamer76.engine.worldgen.megastructure.structure.context.GenVar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
@@ -9,6 +11,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import org.joml.Vector3f;
+
+import java.util.List;
 
 public class SphereStructure extends Structure {
     public SphereStructure(int priority) {
@@ -76,6 +80,11 @@ public class SphereStructure extends Structure {
                 }
             }
         }
+    }
+
+    @Override
+    public List<GenVar<?>> getGenVariables() {
+        return List.of();
     }
 
     public static float mandelbulbSDF(Vector3f p) {

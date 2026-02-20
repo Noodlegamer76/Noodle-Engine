@@ -1,0 +1,22 @@
+{
+  "temperature": 0,
+  "downfall": 0,
+  "has_precipitation": true,
+  "temperature_modifier": "none",
+  "effects": {
+    "sky_color": 10725710,
+    "fog_color": 8371342,
+    "water_color": 10476809,
+    "water_fog_color": 6811497,
+    "grass_color": 976009,
+    "foliage_color": 2657632
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+   [
+     "noodle_engine:mega_feature"
+   ]
+  ]
+}

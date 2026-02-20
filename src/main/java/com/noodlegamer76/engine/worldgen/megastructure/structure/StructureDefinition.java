@@ -3,7 +3,6 @@ package com.noodlegamer76.engine.worldgen.megastructure.structure;
 import com.noodlegamer76.engine.worldgen.megastructure.Node;
 import com.noodlegamer76.engine.worldgen.megastructure.StructMath;
 import com.noodlegamer76.engine.worldgen.megastructure.structure.placers.Placer;
-import com.noodlegamer76.engine.worldgen.megastructure.structure.structures.StructureInstance;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -12,7 +11,8 @@ import java.util.*;
 
 public class StructureDefinition {
     //Integer is node level
-    private final TreeMap<Integer, List<Structure>> structures = new TreeMap<>(Comparator.reverseOrder());
+    private final TreeMap<Integer, List<Structure>> structures =
+            new TreeMap<>(Comparator.reverseOrder());
     private int highestNodeLevel = 0;
 
     public void generate(FeaturePlaceContext<NoneFeatureConfiguration> ctx, StructureInstance instance) {
@@ -23,7 +23,7 @@ public class StructureDefinition {
                 List<Node> nodes = StructMath.get3x3Nodes(center);
 
                 for (Node n : nodes) {
-                    RandomSource random = StructMath.getNodeRandom(n, ctx);
+                    RandomSource random = StructMath.getNodeRandom(n, ctx, structure.getId());
                     if (structure.shouldGenerate(ctx, random)) {
                         structure.generate(ctx, n, random, instance);
                     }
@@ -52,5 +52,10 @@ public class StructureDefinition {
 
     public int getHighestNodeLevel() {
         return highestNodeLevel;
+    }
+
+    @FunctionalInterface
+    public interface ContextSupplier<T> {
+        T create();
     }
 }
