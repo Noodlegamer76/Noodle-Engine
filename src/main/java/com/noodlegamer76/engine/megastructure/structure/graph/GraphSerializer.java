@@ -1,6 +1,8 @@
 package com.noodlegamer76.engine.megastructure.structure.graph;
 
 import com.google.gson.*;
+import com.noodlegamer76.engine.megastructure.structure.StructureDefinition;
+import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.InitNodes;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.Node;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.NodeType;
@@ -23,9 +25,15 @@ public class GraphSerializer {
             .setPrettyPrinting()
             .create();
 
-    public void serialize(Graph graph) {
+    public void serialize(String definitionName, StructureExecuter executer) {
+        JsonObject executerObject = new JsonObject();
+        executerObject.addProperty("name", executer.getName());
+        executerObject.addProperty("priority", executer.getPriority());
+        executerObject.addProperty("nodeLevel", executer.getNodeLevel());
+        executerObject.addProperty("id", executer.getId());
+
+        Graph graph = executer.getFunction();
         JsonObject jsonGraph = new JsonObject();
-        jsonGraph.addProperty("name", graph.getName());
         jsonGraph.addProperty("nextId", graph.getNextIdRaw());
 
         JsonObject jsonNodes = new JsonObject();
@@ -72,31 +80,38 @@ public class GraphSerializer {
 
         jsonGraph.add("links", linksArray);
 
-        new File(STRUCTURES_FOLDER).mkdirs();
+        executerObject.add("graph", jsonGraph);
+
+        new File(definitionName + "/" + STRUCTURES_FOLDER).mkdirs();
 
         try (FileWriter writer =
-                     new FileWriter(STRUCTURES_FOLDER + graph.getName() + ".json")) {
-            gson.toJson(jsonGraph, writer);
+                     new FileWriter(definitionName + "/" + STRUCTURES_FOLDER + executer.getName() + ".json")) {
+            gson.toJson(executerObject, writer);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public Graph deserialize(String structureName) {
+    public StructureExecuter deserialize(String definitionName, String structureName) {
         try (FileReader reader =
-                     new FileReader(STRUCTURES_FOLDER + structureName + ".json")) {
+                     new FileReader(definitionName + "/" + STRUCTURES_FOLDER + structureName + ".json")) {
 
-            JsonObject jsonGraph =
+            JsonObject executerObject =
                     JsonParser.parseReader(reader).getAsJsonObject();
 
-            String name = jsonGraph.get("name").getAsString();
-            int nextId = jsonGraph.get("nextId").getAsInt();
+            String name = executerObject.get("name").getAsString();
+            JsonObject graphObject = executerObject.getAsJsonObject("graph");
+            int priority = executerObject.get("priority").getAsInt();
+            int nodeLevel = executerObject.get("nodeLevel").getAsInt();
+            int id = executerObject.get("id").getAsInt();
 
-            Graph graph = new Graph(name, nextId);
+            int nextId = graphObject.get("nextId").getAsInt();
+
+            Graph graph = new Graph(nextId);
 
             Map<Integer, NodePin> pinsById = new HashMap<>();
 
-            JsonObject jsonNodes = jsonGraph.getAsJsonObject("nodes");
+            JsonObject jsonNodes = graphObject.getAsJsonObject("nodes");
 
             for (String nodeIdStr : jsonNodes.keySet()) {
 
@@ -155,7 +170,7 @@ public class GraphSerializer {
                 graph.addNode(node);
             }
 
-            JsonArray linksArray = jsonGraph.getAsJsonArray("links");
+            JsonArray linksArray = graphObject.getAsJsonArray("links");
 
             if (linksArray != null) {
                 for (JsonElement elem : linksArray) {
@@ -172,7 +187,7 @@ public class GraphSerializer {
                 }
             }
 
-            return graph;
+            return new StructureExecuter(priority, name, graph, nodeLevel, id);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -186,27 +201,56 @@ public class GraphSerializer {
         return type.create(id, graph);
     }
 
-    public List<Graph> loadAllStructures() {
-        List<Graph> graphs = new ArrayList<>();
-        File folder = new File(STRUCTURES_FOLDER);
+    public StructureDefinition loadAllExecuters(String definitionName) {
+        StructureDefinition definition = new StructureDefinition(definitionName);
 
-        if (!folder.exists() || !folder.isDirectory()) {
-            return graphs;
+        File structuresDir = new File(definitionName + "/" + STRUCTURES_FOLDER);
+        if (!structuresDir.exists() || !structuresDir.isDirectory()) {
+            return definition;
         }
 
-        File[] files = folder.listFiles((dir, name) ->
-                name.toLowerCase().endsWith(".json"));
+        File[] files = structuresDir.listFiles(
+                (dir, name) -> name.endsWith(".json")
+        );
 
-        if (files == null) return graphs;
+        if (files == null) return definition;
 
         for (File file : files) {
-            Graph graph =
-                    deserialize(file.getName().replaceFirst("\\.json$", ""));
-            if (graph != null) {
-                graphs.add(graph);
+            String structureName = file.getName().replace(".json", "");
+            StructureExecuter executer = deserialize(definitionName, structureName);
+            if (executer != null) {
+                definition.addStructureExecuter(executer);
             }
         }
 
-        return graphs;
+        return definition;
+    }
+
+    public void serializeAllExecuters(StructureDefinition definition) {
+        String folder = definition.getId();
+        for (Map.Entry<Integer, List<StructureExecuter>> executerPriorities: definition.getStructureExecuters().entrySet()) {
+            for (StructureExecuter executer : executerPriorities.getValue()) {
+                serialize(folder, executer);
+            }
+        }
+    }
+
+    public List<StructureDefinition> loadAllDefinitions() {
+        List<StructureDefinition> definitions = new ArrayList<>();
+
+        File structuresRoot = new File(STRUCTURES_FOLDER);
+        if (!structuresRoot.exists() || !structuresRoot.isDirectory()) {
+            return definitions;
+        }
+
+        File[] definitionFolders = structuresRoot.listFiles(File::isDirectory);
+        if (definitionFolders == null) return definitions;
+
+        for (File folder : definitionFolders) {
+            StructureDefinition definition = loadAllExecuters(folder.getName());
+            definitions.add(definition);
+        }
+
+        return definitions;
     }
 }

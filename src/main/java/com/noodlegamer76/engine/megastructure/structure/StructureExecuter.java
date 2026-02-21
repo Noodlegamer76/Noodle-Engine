@@ -15,12 +15,20 @@ public class StructureExecuter {
     private final Graph function;
     private final int nodeLevel;
 
-    protected StructureExecuter(int priority, String name, Graph function, int nodeLevel) {
+    public StructureExecuter(int priority, String name, Graph function, int nodeLevel) {
         this.priority = priority;
         this.name = name;
         this.function = function;
         this.nodeLevel = nodeLevel;
         this.id = Structures.getInstance().nextId();
+    }
+
+    public StructureExecuter(int priority, String name, Graph function, int nodeLevel, int id) {
+        this.priority = priority;
+        this.name = name;
+        this.function = function;
+        this.nodeLevel = nodeLevel;
+        this.id = id;
     }
 
     public String getName() {

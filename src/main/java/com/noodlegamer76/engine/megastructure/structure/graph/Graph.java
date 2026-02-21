@@ -6,8 +6,6 @@ import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import java.util.*;
 
 public class Graph {
-    private String name;
-
     private int nextId;
 
     private final Map<Integer, Node<?>> nodes = new HashMap<>();
@@ -15,12 +13,11 @@ public class Graph {
     private final List<Link> links = new ArrayList<>();
     private final Map<Integer, List<Link>> adjacencyList = new HashMap<>();
 
-    public Graph(String name) {
-        this(name, 1);
+    public Graph() {
+        this(-1);
     }
 
-    public Graph(String name, int nextId) {
-        this.name = name;
+    public Graph(int nextId) {
         this.nextId = nextId;
     }
 
@@ -120,14 +117,6 @@ public class Graph {
         }
 
         return connected;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public List<Link> getLinksFrom(Node<?> node) {

@@ -2,7 +2,6 @@ package com.noodlegamer76.engine.event;
 ;
 import com.noodlegamer76.engine.NoodleEngine;
 import com.noodlegamer76.engine.gltf.load.GltfLoader;
-import com.noodlegamer76.engine.megastructure.LoadedStructureGraphs;
 import com.noodlegamer76.engine.network.PacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -21,6 +20,5 @@ public class SetupEvents {
             String modelPath = "gltf";
             GltfLoader.loadAllGlbModels(resourceManager, modelPath);
         });
-        event.enqueueWork(LoadedStructureGraphs.getInstance()::loadGraphs);
     }
 }

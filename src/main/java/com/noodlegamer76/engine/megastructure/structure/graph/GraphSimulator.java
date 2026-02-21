@@ -113,7 +113,7 @@ public class GraphSimulator {
                 .min(Comparator.comparingInt(Node::getId))
                 .map(n -> (ExecutionNode<?>) n)
                 .orElseThrow(() -> new GraphSimulationException(
-                        "No entry ExecutionNode found in graph '" + graph.getName() + "'. " +
+                        "No entry ExecutionNode found in graph: '" + "'. " +
                                 "Every ExecutionNode has an incoming execution link (cycle?) " +
                                 "or the graph contains no ExecutionNodes."));
     }

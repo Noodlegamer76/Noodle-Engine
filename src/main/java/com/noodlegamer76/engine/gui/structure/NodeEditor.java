@@ -23,9 +23,8 @@ import java.util.TreeMap;
 
 public class NodeEditor {
     private final GraphSerializer serializer = new GraphSerializer();
-    private Graph currentStructure = new Graph("Untitled");
+    private Graph currentStructure = new Graph();
     private final ImNodesContext context;
-    private final Toolbar toolbar;
 
     private Node<?> draggingNodePreview;
 
@@ -33,11 +32,9 @@ public class NodeEditor {
 
     public NodeEditor() {
         context = ImNodes.editorContextCreate();
-        toolbar = new Toolbar();
     }
 
     public void render(GuiGraphics guiGraphics) {
-        toolbar.render(guiGraphics, this);
 
         int windowFlags =
                 ImGuiWindowFlags.MenuBar |
@@ -261,9 +258,5 @@ public class NodeEditor {
             node.x = pos.x;
             node.y = pos.y;
         }
-    }
-
-    public Toolbar getToolbar() {
-        return toolbar;
     }
 }
