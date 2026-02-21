@@ -169,6 +169,25 @@ dependencies {
     minecraftLibrary 'de.javagl:jgltf-model:2.0.4'
     implementation fg.deobf("curse.maven:distant-horizons-508933:6387680")
 
+
+    minecraftLibrary("io.github.spair:imgui-java-binding:${project.imguiVersion}") {
+        exclude group: "org.lwjgl"
+    }
+    minecraftLibrary("io.github.spair:imgui-java-lwjgl3:${project.imguiVersion}") {
+        exclude group: "org.lwjgl"
+    }
+
+    runtimeOnly "io.github.spair:imgui-java-natives-windows:${project.imguiVersion}"
+    runtimeOnly "io.github.spair:imgui-java-natives-linux:${project.imguiVersion}"
+
+    shadow("io.github.spair:imgui-java-binding:${project.imguiVersion}") {
+        exclude group: "org.lwjgl"
+    }
+    shadow("io.github.spair:imgui-java-lwjgl3:${project.imguiVersion}") {
+        exclude group: "org.lwjgl"
+    }
+    shadow "io.github.spair:imgui-java-natives-windows:${project.imguiVersion}"
+    shadow "io.github.spair:imgui-java-natives-linux:${project.imguiVersion}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
@@ -308,3 +327,57 @@ build {
     dependsOn shadowJar
     finalizedBy moveFiles
 }
+
+task extractImguiNativesToResources {
+    group = "build"
+    description = "Extract ImGui native binaries from Gradle dependencies into resources/natives/... for packaging"
+
+    doLast {
+        // Map file extensions/patterns to their resource subdirectory
+        def nativeMappings = [
+                { String name -> name.endsWith(".dll") } : "windows/x86_64",
+                { String name -> name.endsWith("32.dll") } : "windows/x86",
+                { String name -> name.endsWith(".so") } : "linux/x86_64",
+                { String name -> name.endsWith("32.so") } : "linux/x86",
+                { String name -> name.endsWith(".dylib") } : "osx/x86_64",
+        ]
+
+        configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            if (artifact.name.startsWith("imgui-java-natives")) {
+                println "Extracting from dependency: ${artifact.file.name}"
+
+                ZipFile zip = new ZipFile(artifact.file)
+                zip.entries().each { entry ->
+                    if (!entry.isDirectory()) {
+                        def entryName = entry.name
+                        def fileName = entryName.substring(entryName.lastIndexOf('/') + 1)
+
+                        // Determine which OS/arch subdir this native belongs to based on filename
+                        def subdir = null
+                        if (fileName.endsWith(".dll")) {
+                            subdir = fileName.contains("32") ? "windows/x86" : "windows/x86_64"
+                        } else if (fileName.endsWith(".so")) {
+                            subdir = fileName.contains("32") ? "linux/x86" : "linux/x86_64"
+                        } else if (fileName.endsWith(".dylib")) {
+                            subdir = fileName.contains("arm") ? "osx/arm64" : "osx/x86_64"
+                        }
+
+                        if (subdir != null) {
+                            def destDir = file("src/main/resources/natives/${subdir}")
+                            destDir.mkdirs()
+
+                            def outFile = new File(destDir, fileName)
+                            outFile.withOutputStream { osStream ->
+                                zip.getInputStream(entry).withStream { it.transferTo(osStream) }
+                            }
+                            println "Copied $fileName -> $outFile"
+                        }
+                    }
+                }
+                zip.close()
+            }
+        }
+    }
+}
+
+compileJava.dependsOn(extractImguiNativesToResources)

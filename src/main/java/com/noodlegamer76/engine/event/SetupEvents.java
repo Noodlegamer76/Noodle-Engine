@@ -2,11 +2,10 @@ package com.noodlegamer76.engine.event;
 ;
 import com.noodlegamer76.engine.NoodleEngine;
 import com.noodlegamer76.engine.gltf.load.GltfLoader;
+import com.noodlegamer76.engine.megastructure.LoadedStructureGraphs;
 import com.noodlegamer76.engine.network.PacketHandler;
-import com.noodlegamer76.engine.worldgen.megastructure.structure.Structures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -15,12 +14,13 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 public class SetupEvents {
 
     @SubscribeEvent
-    public static void clientSetup(FMLCommonSetupEvent event) throws Exception {
+    public static void clientSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(PacketHandler::register);
         event.enqueueWork(() -> {
             ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
             String modelPath = "gltf";
             GltfLoader.loadAllGlbModels(resourceManager, modelPath);
         });
+        event.enqueueWork(LoadedStructureGraphs.getInstance()::loadGraphs);
     }
 }

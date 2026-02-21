@@ -1,8 +1,7 @@
 package com.noodlegamer76.engine.worldgen.features;
 
 import com.mojang.serialization.Codec;
-import com.noodlegamer76.engine.worldgen.megastructure.MegaStructureGenerator;
-import net.minecraft.world.level.block.Blocks;
+import com.noodlegamer76.engine.megastructure.MegaStructureGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;

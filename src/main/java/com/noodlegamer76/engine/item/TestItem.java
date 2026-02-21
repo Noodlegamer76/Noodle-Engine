@@ -1,9 +1,9 @@
 package com.noodlegamer76.engine.item;
 
 import com.noodlegamer76.engine.NoodleEngine;
-import com.noodlegamer76.engine.worldgen.megastructure.structure.Structures;
+import com.noodlegamer76.engine.gui.structure.StructureEditorScreen;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -41,13 +41,16 @@ public class TestItem extends Item {
        //    level.addFreshEntity(object);
        //}
         ResourceLocation location = ResourceLocation.fromNamespaceAndPath(NoodleEngine.MODID, "gltf/truck.glb");
-        if (level instanceof ServerLevel serverLevel) {
-            for (int i = 0; i < 1; i++) {
-                Structures.getInstance().clearDefinitions();
-                Structures.getInstance().setupStructures(serverLevel.getServer());
-            }
-        }
+       // if (level instanceof ServerLevel serverLevel) {
+       //     for (int i = 0; i < 1; i++) {
+       //         Structures.getInstance().clearDefinitions();
+       //         Structures.getInstance().setupStructures(serverLevel.getServer());
+       //     }
+       // }
 
+        if (level.isClientSide) {
+            Minecraft.getInstance().setScreen(new StructureEditorScreen());
+        }
         return super.use(level, player, usedHand);
     }
 
