@@ -20,7 +20,7 @@ public class StructureExecuter {
         this.name = name;
         this.function = function;
         this.nodeLevel = nodeLevel;
-        this.id = Structures.getInstance().nextId();
+        this.id = Structures.getInstance(true).nextId();
     }
 
     public StructureExecuter(int priority, String name, Graph function, int nodeLevel, int id) {

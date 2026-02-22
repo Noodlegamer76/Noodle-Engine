@@ -1,11 +1,14 @@
 package com.noodlegamer76.engine.gui.structure;
 
+import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.graph.GraphSerializer;
 import com.noodlegamer76.engine.megastructure.structure.graph.Link;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.InitNodes;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.Node;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.NodeType;
+import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
+import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinCategory;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.extension.imnodes.ImNodes;
@@ -23,7 +26,7 @@ import java.util.TreeMap;
 
 public class NodeEditor {
     private final GraphSerializer serializer = new GraphSerializer();
-    private Graph currentStructure = new Graph();
+    private StructureExecuter currentStructure;
     private final ImNodesContext context;
 
     private Node<?> draggingNodePreview;
@@ -92,7 +95,7 @@ public class NodeEditor {
 
         InitNodes.NODE_TYPES.getEntries().forEach(regObj -> {
             NodeType<? extends Node<?>> type = regObj.get();
-            Node<?> preview = type.create(-1, currentStructure);
+            Node<?> preview = type.create(-1, currentStructure.getFunction());
             preview.initPins();
 
             grouped.computeIfAbsent(preview.getCategoryPath(), k -> new ArrayList<>())
@@ -102,7 +105,7 @@ public class NodeEditor {
         for (Map.Entry<String, List<NodeType<? extends Node<?>>>> entry : grouped.entrySet()) {
             if (ImGui.collapsingHeader(entry.getKey())) {
                 for (NodeType<? extends Node<?>> type : entry.getValue()) {
-                    Node<?> preview = type.create(-1, currentStructure);
+                    Node<?> preview = type.create(-1, currentStructure.getFunction());
                     preview.initPins();
 
                     ImGui.button(preview.getDisplayName());
@@ -122,17 +125,17 @@ public class NodeEditor {
 
             ImGui.setNextWindowPos(mouseX, mouseY);
             ImGui.begin("NodePreview", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoInputs);
-            ImGui.text(draggingNodeType.create(-1, currentStructure).getDisplayName());
+            ImGui.text(draggingNodeType.create(-1, currentStructure.getFunction()).getDisplayName());
             draggingNodePreview.initPins();
             ImGui.end();
 
             if (!ImGui.isMouseDown(0)) {
-                int id = currentStructure.nextId();
-                Node<?> node = draggingNodeType.create(id, currentStructure);
+                int id = currentStructure.getFunction().nextId();
+                Node<?> node = draggingNodeType.create(id, currentStructure.getFunction());
                 node.initPins();
                 node.x = mouseX;
                 node.y = mouseY;
-                currentStructure.addNode(node);
+                currentStructure.getFunction().addNode(node);
                 ImNodes.setNodeScreenSpacePos(node.getId(), node.x, node.y);
 
                 draggingNodeType = null;
@@ -144,11 +147,11 @@ public class NodeEditor {
         ImNodes.editorContextSet(context);
         ImNodes.beginNodeEditor();
 
-        for (Node<?> node : currentStructure.getNodes().values()) {
+        for (Node<?> node : currentStructure.getFunction().getNodes().values()) {
             node.render();
         }
 
-        for (Link link : currentStructure.getLinks()) {
+        for (Link link : currentStructure.getFunction().getLinks()) {
             ImNodes.link(link.getId(), link.getStartPinId(), link.getEndPinId());
         }
 
@@ -179,25 +182,49 @@ public class NodeEditor {
         ImInt endAttr = new ImInt();
 
         if (ImNodes.isLinkCreated(startAttr, endAttr)) {
-            int linkId = currentStructure.nextId();
-            Link link = new Link(linkId, startAttr.get(), endAttr.get());
-            currentStructure.addLink(link);
+            NodePin startPin = currentStructure.getFunction().getPin(startAttr.get());
+            NodePin endPin = currentStructure.getFunction().getPin(endAttr.get());
+
+            if (!isLinkValid(startPin, endPin)) {
+                return;
+            }
+
+            int linkId = currentStructure.getFunction().nextId();
+            currentStructure.getFunction().addLink(new Link(linkId, startAttr.get(), endAttr.get()));
         }
 
         ImInt linkId = new ImInt();
         if (ImNodes.isLinkDestroyed(linkId)) {
-            currentStructure.removeLink(linkId.get());
+            currentStructure.getFunction().removeLink(linkId.get());
         }
     }
 
-    public Graph getCurrentStructure() {
+    private boolean isLinkValid(NodePin start, NodePin end) {
+        if (start == null || end == null) return false;
+
+        if (start.getKind() == end.getKind()) return false;
+
+        if (start.getCategory() != end.getCategory()) return false;
+
+        if (start.getCategory() == PinCategory.DATA) {
+            Class<?> startType = start.getDataType();
+            Class<?> endType = end.getDataType();
+
+            if (startType == null || endType == null) return false;
+            return endType.isAssignableFrom(startType);
+        }
+
+        return true;
+    }
+
+    public StructureExecuter getCurrentStructure() {
         return currentStructure;
     }
 
-    public void setCurrentStructure(Graph currentStructure) {
+    public void setCurrentStructure(StructureExecuter currentStructure) {
         this.currentStructure = currentStructure;
 
-        for (Node<?> node : currentStructure.getNodes().values()) {
+        for (Node<?> node : currentStructure.getFunction().getNodes().values()) {
             ImNodes.setNodeEditorSpacePos(node.getId(), node.x, node.y);
         }
     }
@@ -212,19 +239,19 @@ public class NodeEditor {
         List<Node<?>> selectedNodes = getSelectedNodes();
 
         for (Node<?> node: selectedNodes) {
-            selectedLink.addAll(currentStructure.getLinksFrom(node));
+            selectedLink.addAll(currentStructure.getFunction().getLinksFrom(node));
         }
 
-        for (Map.Entry<Integer, List<Link>> edges: currentStructure.getAdjacencyList().entrySet()) {
+        for (Map.Entry<Integer, List<Link>> edges: currentStructure.getFunction().getAdjacencyList().entrySet()) {
             edges.getValue().removeAll(selectedLink);
         }
 
         for (Link link: selectedLink) {
-            currentStructure.removeLink(link.getId());
+            currentStructure.getFunction().removeLink(link.getId());
         }
 
         for (Node node: selectedNodes) {
-            currentStructure.removeNode(node.getId());
+            currentStructure.getFunction().removeNode(node.getId());
         }
 
         ImNodes.clearLinkSelection();
@@ -233,7 +260,7 @@ public class NodeEditor {
 
     public List<Node<?>> getSelectedNodes() {
         List<Node<?>> nodes = new ArrayList<>();
-        for (Node<?> node : currentStructure.getNodes().values()) {
+        for (Node<?> node : currentStructure.getFunction().getNodes().values()) {
             if (ImNodes.isNodeSelected(node.getId())) {
                 nodes.add(node);
             }
@@ -243,7 +270,7 @@ public class NodeEditor {
 
     public List<Link> getSelectedLink() {
         List<Link> links = new ArrayList<>();
-        for (Link link : currentStructure.getLinks()) {
+        for (Link link : currentStructure.getFunction().getLinks()) {
             if (ImNodes.isLinkSelected(link.getId())) {
                 links.add(link);
             }
@@ -252,7 +279,8 @@ public class NodeEditor {
     }
 
     public void setNodePositions() {
-        for (Node<?> node : currentStructure.getNodes().values()) {
+        if (currentStructure == null) return;
+        for (Node<?> node : currentStructure.getFunction().getNodes().values()) {
             ImVec2 pos = new ImVec2();
             ImNodes.getNodeEditorSpacePos(node.getId(), pos);
             node.x = pos.x;

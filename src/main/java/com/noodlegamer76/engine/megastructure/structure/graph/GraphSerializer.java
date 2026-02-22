@@ -3,6 +3,7 @@ package com.noodlegamer76.engine.megastructure.structure.graph;
 import com.google.gson.*;
 import com.noodlegamer76.engine.megastructure.structure.StructureDefinition;
 import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
+import com.noodlegamer76.engine.megastructure.structure.Structures;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.InitNodes;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.Node;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.NodeType;
@@ -11,21 +12,21 @@ import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.RegistryObject;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class GraphSerializer {
     private static final String STRUCTURES_FOLDER = "structures/";
 
-    private final Gson gson = new GsonBuilder()
+    private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .create();
 
-    public void serialize(String definitionName, StructureExecuter executer) {
+    public static JsonObject serialize(String definitionName, StructureExecuter executer) {
         JsonObject executerObject = new JsonObject();
         executerObject.addProperty("name", executer.getName());
         executerObject.addProperty("priority", executer.getPriority());
@@ -43,6 +44,7 @@ public class GraphSerializer {
             JsonObject nodeJson = new JsonObject();
             nodeJson.addProperty("id", node.getId());
             nodeJson.addProperty("type", node.getRegistry().getId().toString());
+            nodeJson.add("data", node.saveData());
 
             nodeJson.addProperty("x", node.x);
             nodeJson.addProperty("y", node.y);
@@ -82,19 +84,22 @@ public class GraphSerializer {
 
         executerObject.add("graph", jsonGraph);
 
-        new File(definitionName + "/" + STRUCTURES_FOLDER).mkdirs();
+        String dir = STRUCTURES_FOLDER + definitionName + "/";
+        new File(dir).mkdirs();
 
-        try (FileWriter writer =
-                     new FileWriter(definitionName + "/" + STRUCTURES_FOLDER + executer.getName() + ".json")) {
+        try (FileWriter writer = new FileWriter(dir + executer.getName() + ".json")) {
             gson.toJson(executerObject, writer);
+            return executerObject;
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 
-    public StructureExecuter deserialize(String definitionName, String structureName) {
-        try (FileReader reader =
-                     new FileReader(definitionName + "/" + STRUCTURES_FOLDER + structureName + ".json")) {
+    public static StructureExecuter deserialize(String definitionName, String structureName) {
+        String path = STRUCTURES_FOLDER + definitionName + "/" + structureName + ".json";
+        try (FileReader reader = new FileReader(path)) {
 
             JsonObject executerObject =
                     JsonParser.parseReader(reader).getAsJsonObject();
@@ -127,6 +132,13 @@ public class GraphSerializer {
 
                 Node<?> node = instantiateNode(registry, nodeId, graph);
 
+                if (nodeJson.has("data")) {
+                    JsonObject data = nodeJson.getAsJsonObject("data");
+                    if (data != null) {
+                        node.loadData(data);
+                    }
+                }
+
                 node.x = nodeJson.has("x") ? nodeJson.get("x").getAsInt() : 0;
                 node.y = nodeJson.has("y") ? nodeJson.get("y").getAsInt() : 0;
 
@@ -149,9 +161,9 @@ public class GraphSerializer {
                             PinCategory.valueOf(pinJson.get("category").getAsString());
 
                     Class<?> dataType = null;
-                    if (!pinJson.get("dataType").isJsonNull()) {
-                        dataType =
-                                Class.forName(pinJson.get("dataType").getAsString());
+                    JsonElement dataTypeElem = pinJson.get("dataType");
+                    if (dataTypeElem != null && !dataTypeElem.isJsonNull()) {
+                        dataType = Class.forName(dataTypeElem.getAsString());
                     }
 
                     NodePin pin = new NodePin(
@@ -192,27 +204,23 @@ public class GraphSerializer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
-    private Node<? extends Node<?>> instantiateNode(RegistryObject<NodeType<? extends Node<?>>> registry, int id, Graph graph) {
+    private static Node<? extends Node<?>> instantiateNode(RegistryObject<NodeType<? extends Node<?>>> registry, int id, Graph graph) {
         NodeType<? extends Node<?>> type = registry.get();
         return type.create(id, graph);
     }
 
-    public StructureDefinition loadAllExecuters(String definitionName) {
+    public static StructureDefinition loadAllExecuters(String definitionName) {
         StructureDefinition definition = new StructureDefinition(definitionName);
 
-        File structuresDir = new File(definitionName + "/" + STRUCTURES_FOLDER);
+        File structuresDir = new File(STRUCTURES_FOLDER + definitionName + "/");
         if (!structuresDir.exists() || !structuresDir.isDirectory()) {
             return definition;
         }
 
-        File[] files = structuresDir.listFiles(
-                (dir, name) -> name.endsWith(".json")
-        );
-
+        File[] files = structuresDir.listFiles((dir, name) -> name.endsWith(".json"));
         if (files == null) return definition;
 
         for (File file : files) {
@@ -226,31 +234,105 @@ public class GraphSerializer {
         return definition;
     }
 
-    public void serializeAllExecuters(StructureDefinition definition) {
-        String folder = definition.getId();
-        for (Map.Entry<Integer, List<StructureExecuter>> executerPriorities: definition.getStructureExecuters().entrySet()) {
-            for (StructureExecuter executer : executerPriorities.getValue()) {
-                serialize(folder, executer);
+    public static void serializeDefinition(StructureDefinition definition) {
+        for (Map.Entry<Integer, List<StructureExecuter>> entry : definition.getStructureExecuters().entrySet()) {
+            for (StructureExecuter executer : entry.getValue()) {
+                serialize(definition.getId(), executer);
             }
         }
     }
 
-    public List<StructureDefinition> loadAllDefinitions() {
-        List<StructureDefinition> definitions = new ArrayList<>();
-
+    public static void loadAllDefinitions(boolean isClientSide) {
         File structuresRoot = new File(STRUCTURES_FOLDER);
-        if (!structuresRoot.exists() || !structuresRoot.isDirectory()) {
-            return definitions;
-        }
+        if (!structuresRoot.exists() || !structuresRoot.isDirectory()) return;
 
         File[] definitionFolders = structuresRoot.listFiles(File::isDirectory);
-        if (definitionFolders == null) return definitions;
+        if (definitionFolders == null) return;
 
         for (File folder : definitionFolders) {
             StructureDefinition definition = loadAllExecuters(folder.getName());
-            definitions.add(definition);
+            Structures.getInstance(isClientSide).addDefinition(definition);
+        }
+    }
+
+    public static StructureExecuter deserializeExecuterFromBytes(byte[] bytes) {
+        try {
+            String json = new String(bytes, StandardCharsets.UTF_8);
+            JsonObject executerObject = JsonParser.parseString(json).getAsJsonObject();
+            return GraphSerializer.deserializeFromJson(executerObject);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static StructureExecuter deserializeFromJson(JsonObject executerObject) throws Exception {
+        String name = executerObject.get("name").getAsString();
+        JsonObject graphObject = executerObject.getAsJsonObject("graph");
+        int priority = executerObject.get("priority").getAsInt();
+        int nodeLevel = executerObject.get("nodeLevel").getAsInt();
+        int id = executerObject.get("id").getAsInt();
+
+        int nextId = graphObject.get("nextId").getAsInt();
+        Graph graph = new Graph(nextId);
+        Map<Integer, NodePin> pinsById = new HashMap<>();
+
+        JsonObject jsonNodes = graphObject.getAsJsonObject("nodes");
+        for (String nodeIdStr : jsonNodes.keySet()) {
+            JsonObject nodeJson = jsonNodes.getAsJsonObject(nodeIdStr);
+            int nodeId = nodeJson.get("id").getAsInt();
+
+            ResourceLocation typeLocationId = ResourceLocation.tryParse(nodeJson.get("type").getAsString());
+            if (typeLocationId == null) continue;
+
+            RegistryObject<NodeType<? extends Node<?>>> registry = InitNodes.getComponentType(typeLocationId);
+            Node<?> node = instantiateNode(registry, nodeId, graph);
+
+            if (nodeJson.has("data")) {
+                JsonObject data = nodeJson.getAsJsonObject("data");
+                if (data != null) {
+                    node.loadData(data);
+                }
+            }
+
+            node.x = nodeJson.has("x") ? nodeJson.get("x").getAsInt() : 0;
+            node.y = nodeJson.has("y") ? nodeJson.get("y").getAsInt() : 0;
+
+            for (JsonElement elem : nodeJson.getAsJsonArray("pins")) {
+                JsonObject pinJson = elem.getAsJsonObject();
+
+                Class<?> dataType = null;
+                JsonElement dataTypeElem = pinJson.get("dataType");
+                if (dataTypeElem != null && !dataTypeElem.isJsonNull()) {
+                    dataType = Class.forName(dataTypeElem.getAsString());
+                }
+
+                NodePin pin = new NodePin(
+                        pinJson.get("id").getAsInt(),
+                        pinJson.get("nodeId").getAsInt(),
+                        PinKind.valueOf(pinJson.get("kind").getAsString()),
+                        PinCategory.valueOf(pinJson.get("category").getAsString()),
+                        dataType,
+                        pinJson.get("name").getAsString()
+                );
+                node.getPins().add(pin);
+                pinsById.put(pin.getId(), pin);
+            }
+            graph.addNode(node);
         }
 
-        return definitions;
+        JsonArray linksArray = graphObject.getAsJsonArray("links");
+        if (linksArray != null) {
+            for (JsonElement elem : linksArray) {
+                JsonObject linkJson = elem.getAsJsonObject();
+                graph.addLink(new Link(
+                        linkJson.get("id").getAsInt(),
+                        linkJson.get("startPinId").getAsInt(),
+                        linkJson.get("endPinId").getAsInt()
+                ));
+            }
+        }
+
+        return new StructureExecuter(priority, name, graph, nodeLevel, id);
     }
 }

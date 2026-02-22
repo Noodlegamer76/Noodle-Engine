@@ -1,5 +1,6 @@
 package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constant;
 
+import com.google.gson.JsonObject;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionContext;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.InitNodes;
@@ -28,8 +29,6 @@ public class ConstantIntNode extends ValueNode<ConstantIntNode> {
     @Override
     protected void renderContents() {
         ImGui.setNextItemWidth(120f);
-        ImGui.inputText("Test", new ImString());
-        ImGui.setNextItemWidth(120f);
         ImGui.inputInt("Value", value);
     }
 
@@ -42,5 +41,17 @@ public class ConstantIntNode extends ValueNode<ConstantIntNode> {
     public List<GenVar<?>> evaluate(Graph graph, ExecutionContext context) {
         constant.setValue(value.get());
         return List.of(constant);
+    }
+
+    @Override
+    public JsonObject saveData() {
+        JsonObject data = super.saveData();
+        data.addProperty("value", value.get());
+        return data;
+    }
+
+    @Override
+    public void loadData(JsonObject data) {
+        value.set(data.get("value").getAsInt());
     }
 }

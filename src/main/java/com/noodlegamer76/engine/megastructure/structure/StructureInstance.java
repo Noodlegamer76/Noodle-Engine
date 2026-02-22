@@ -22,9 +22,12 @@ import java.util.Map;
 public class StructureInstance {
     private final StructureDefinition definition;
     private final GraphSimulator simulator = new GraphSimulator();
+    private final FeaturePlaceContext<NoneFeatureConfiguration> ctx;
+    private final List<Placer> placers = new ArrayList<>();
 
-    public StructureInstance(StructureDefinition definition) {
+    public StructureInstance(StructureDefinition definition, FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
         this.definition = definition;
+        this.ctx = ctx;
     }
 
     public void generate(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
@@ -32,6 +35,10 @@ public class StructureInstance {
             for (StructureExecuter executer : executerList) {
                 processExecuterForNodes(ctx, executer);
             }
+        }
+
+        for (Placer placer: getPlacers()) {
+            placer.place(ctx,ctx.random(), this);
         }
     }
 
@@ -42,7 +49,7 @@ public class StructureInstance {
 
         for (Node node : nodes) {
             ExecutionContext nodeContext = createExecutionContext(ctx, node, executer);
-            simulator.run(executer.getFunction(), nodeContext);
+            simulator.run(executer.getFunction(), nodeContext, this);
         }
     }
 
@@ -57,4 +64,15 @@ public class StructureInstance {
         return definition;
     }
 
+    public FeaturePlaceContext<NoneFeatureConfiguration> getContext() {
+        return ctx;
+    }
+
+    public List<Placer> getPlacers() {
+        return placers;
+    }
+
+    public void addPlacer(Placer placer) {
+        placers.add(placer);
+    }
 }

@@ -1,5 +1,6 @@
 package com.noodlegamer76.engine.megastructure.structure.graph.node;
 
+import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -10,5 +11,5 @@ public abstract class ExecutionNode<T extends Node<T>> extends Node<T> {
         super(id, graph, registry, name, category);
     }
 
-    public abstract void execute(Graph graph, ExecutionContext context);
+    public abstract void execute(Graph graph, ExecutionContext context, StructureInstance instance);
 }

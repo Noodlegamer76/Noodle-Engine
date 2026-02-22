@@ -1,6 +1,9 @@
 package com.noodlegamer76.engine.megastructure.structure.variables;
 
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constant.BlockPosNode;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
 public class GenVarSerializers {
@@ -20,5 +23,17 @@ public class GenVarSerializers {
             ((tag, name) -> {
                 return new Vec3(tag.getDouble(name + "_x"), tag.getDouble(name + "_y"), tag.getDouble(name + "_z"));
             })
+    );
+    public static final GenVarSerializer<ResourceLocation> RESOURCE_LOCATION = GenVarSerializer.create(
+            ((tag, name, value) -> tag.putString(name, value.toString())),
+            ((tag, name) -> ResourceLocation.tryParse(tag.getString(name)))
+    );
+    public static final GenVarSerializer<BlockPos> BLOCK_POS = GenVarSerializer.create(
+            ((tag, name, value) -> {
+                tag.putInt(name + "_x", value.getX());
+                tag.putInt(name + "_y", value.getY());
+                tag.putInt(name + "_z", value.getZ());
+            }),
+            ((tag, name) -> new BlockPos(tag.getInt(name + "_x"), tag.getInt(name + "_y"), tag.getInt(name + "_z")))
     );
 }

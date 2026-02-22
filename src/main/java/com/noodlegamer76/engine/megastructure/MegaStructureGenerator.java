@@ -8,13 +8,13 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 
 public class MegaStructureGenerator {
     public static void generate(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
-        for (StructureDefinition def : Structures.getInstance().getStructures()) {
+        for (StructureDefinition def : Structures.getInstance(false).getDefinitions().values()) {
             generateInstance(ctx, def);
         }
     }
 
     private static void generateInstance(FeaturePlaceContext<NoneFeatureConfiguration> ctx, StructureDefinition definition) {
-        StructureInstance instance = new StructureInstance(definition);
+        StructureInstance instance = new StructureInstance(definition, ctx);
         instance.generate(ctx);
     }
 }

@@ -1,5 +1,6 @@
 package com.noodlegamer76.engine.megastructure.structure.graph.node;
 
+import com.google.gson.JsonObject;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
@@ -86,6 +87,13 @@ public abstract class Node<T extends Node<T>> {
 
     public Graph getGraph() {
         return graph;
+    }
+
+    public JsonObject saveData() {
+        return new JsonObject();
+    }
+
+    public void loadData(JsonObject data) {
     }
 
     protected abstract void renderContents();

@@ -1,5 +1,6 @@
 package com.noodlegamer76.engine.megastructure.structure.graph;
 
+import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionContext;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionNode;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.Node;
@@ -34,8 +35,8 @@ public class GraphSimulator {
      * @param graph the graph to simulate
      * @throws GraphSimulationException if the graph is malformed or no entry node exists
      */
-    public void run(Graph graph) {
-        run(graph, new ExecutionContext());
+    public void run(Graph graph, StructureInstance instance) {
+        run(graph, new ExecutionContext(), instance);
     }
 
     /**
@@ -46,17 +47,20 @@ public class GraphSimulator {
      * @param graph   the graph to simulate
      * @param context execution context (globals are preserved; value cache is cleared)
      */
-    public void run(Graph graph, ExecutionContext context) {
+    public void run(Graph graph, ExecutionContext context, StructureInstance instance) {
         context.clear();
         ExecutionNode<?> entry = findEntryNode(graph);
-        runFrom(graph, context, entry);
+        if (entry == null) {
+            return;
+        }
+        runFrom(graph, context, entry, instance);
     }
 
     /**
      * Runs the graph starting from a specific {@link ExecutionNode}.
      * Useful when you want to resume from a known node or trigger a sub-graph.
      */
-    public void runFrom(Graph graph, ExecutionContext context, ExecutionNode<?> startNode) {
+    public void runFrom(Graph graph, ExecutionContext context, ExecutionNode<?> startNode, StructureInstance instance) {
         ExecutionNode<?> current = startNode;
         Set<Integer> visited = new HashSet<>();
 
@@ -67,7 +71,7 @@ public class GraphSimulator {
             }
 
             resolveDataInputs(graph, context, current);
-            current.execute(graph, context);
+            current.execute(graph, context, instance);
 
             current = findNextExecutionNode(graph, current);
         }
@@ -107,15 +111,10 @@ public class GraphSimulator {
      * the lowest node ID is chosen for determinism.
      */
     public ExecutionNode<?> findEntryNode(Graph graph) {
-        return graph.getNodes().values().stream()
+        return (ExecutionNode<?>) graph.getNodes().values().stream()
                 .filter(n -> n instanceof ExecutionNode)
                 .filter(n -> !hasIncomingExecutionLink(graph, n))
-                .min(Comparator.comparingInt(Node::getId))
-                .map(n -> (ExecutionNode<?>) n)
-                .orElseThrow(() -> new GraphSimulationException(
-                        "No entry ExecutionNode found in graph: '" + "'. " +
-                                "Every ExecutionNode has an incoming execution link (cycle?) " +
-                                "or the graph contains no ExecutionNodes."));
+                .min(Comparator.comparingInt(Node::getId)).orElse(null);
     }
 
     /**
@@ -197,10 +196,30 @@ public class GraphSimulator {
         Optional<NodePin> upstream = graph.getConnectedOutput(inputPin);
         if (upstream.isEmpty()) return null;
 
-        Object cached = context.getLocalVars(upstream.get().getNodeId());
-        if (cached == null) return null;
+        List<GenVar<?>> vars = context.getLocalVars(upstream.get().getNodeId());
+        if (vars == null) return null;
 
-        return type.cast(cached);
+        return vars.stream()
+                .filter(var -> type.isInstance(var.getValue()))
+                .map(var -> type.cast(var.getValue()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static <V> V resolveInputByPin(Graph graph, ExecutionContext context,
+                                          NodePin inputPin, Class<V> type) {
+        Optional<NodePin> upstreamPin = graph.getConnectedOutput(inputPin);
+        if (upstreamPin.isEmpty()) return null;
+
+        List<GenVar<?>> vars = context.getLocalVars(upstreamPin.get().getNodeId());
+        if (vars == null) return null;
+
+        return vars.stream()
+                .filter(var -> upstreamPin.get().getDataType() != null
+                        && upstreamPin.get().getDataType().isInstance(var.getValue()))
+                .map(var -> type.cast(var.getValue()))
+                .findFirst()
+                .orElse(null);
     }
 
     public static class GraphSimulationException extends RuntimeException {

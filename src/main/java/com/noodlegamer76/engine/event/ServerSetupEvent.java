@@ -2,6 +2,7 @@ package com.noodlegamer76.engine.event;
 
 import com.noodlegamer76.engine.NoodleEngine;
 import com.noodlegamer76.engine.megastructure.structure.Structures;
+import com.noodlegamer76.engine.megastructure.structure.graph.GraphSerializer;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -11,6 +12,7 @@ public class ServerSetupEvent {
 
     @SubscribeEvent
     public static void serverSetup(ServerStartedEvent event) {
-        Structures.getInstance().setupStructures(event.getServer());
+        Structures.getInstance(false).clearDefinitions();
+        GraphSerializer.loadAllDefinitions(false);
     }
 }

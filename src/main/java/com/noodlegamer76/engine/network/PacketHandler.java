@@ -23,10 +23,10 @@ public class PacketHandler {
                 .consumerMainThread(ComponentPacket::handle)
                 .add();
 
-        INSTANCE.messageBuilder(ImGuiButtonPacket.class, 1, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(ImGuiButtonPacket::encode)
-                .decoder(ImGuiButtonPacket::new)
-                .consumerMainThread(ImGuiButtonPacket::handle)
+        INSTANCE.messageBuilder(StructureDefinitionUpload.class, 1, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(StructureDefinitionUpload::encode)
+                .decoder(StructureDefinitionUpload::new)
+                .consumerMainThread(StructureDefinitionUpload::handle)
                 .add();
     }
 
