@@ -3,6 +3,7 @@ package com.noodlegamer76.engine.megastructure.structure.graph.node;
 import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
 import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
+import com.noodlegamer76.engine.megastructure.structure.graph.GraphSimulator;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -13,6 +14,15 @@ public abstract class ValueNode<T extends Node<T>> extends Node<T> {
 
     protected ValueNode(int id, Graph graph, RegistryObject<NodeType<T>> registry, String name, String category) {
         super(id, graph, registry, name, category);
+    }
+
+    protected <V> V resolve(ExecutionContext context, String pinName, Class<V> type) {
+        return GraphSimulator.resolveInputByPin(getGraph(), context, getPin(pinName), type);
+    }
+
+    protected <V> V resolve(ExecutionContext context, String pinName, Class<V> type, V defaultValue) {
+        V value = resolve(context, pinName, type);
+        return value != null ? value : defaultValue;
     }
 
     public abstract List<GenVar<?>> evaluate(StructureExecuter executer, ExecutionContext context, StructureInstance instance);

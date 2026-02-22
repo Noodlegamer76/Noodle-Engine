@@ -10,11 +10,14 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class Node<T extends Node<T>> {
     protected final int id;
     protected final List<NodePin> pins = new ArrayList<>();
+    private final Map<String, NodePin> pinsByDisplayName = new HashMap<>();
     public float x, y;
     private final RegistryObject<NodeType<T>> registry;
 
@@ -48,6 +51,7 @@ public abstract class Node<T extends Node<T>> {
 
     protected void addPin(NodePin pin) {
         pins.add(pin);
+        pinsByDisplayName.put(pin.getDisplayName(), pin);
     }
 
     public void render() {
@@ -94,6 +98,10 @@ public abstract class Node<T extends Node<T>> {
     }
 
     public void loadData(JsonObject data) {
+    }
+
+    public NodePin getPin(String displayName) {
+        return pinsByDisplayName.get(displayName);
     }
 
     protected abstract void renderContents();

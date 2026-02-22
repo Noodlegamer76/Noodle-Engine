@@ -46,8 +46,6 @@ public class GraphSimulator {
     }
 
     public List<GenVar<?>> evaluateValues(StructureExecuter executer, ExecutionContext context, ValueNode<?> node, StructureInstance instance) {
-        Graph graph = executer.getFunction();
-
         List<GenVar<?>> cached = context.getLocalVars(node.getId());
         if (cached != null) return cached;
 
@@ -90,9 +88,20 @@ public class GraphSimulator {
     }
 
     private ExecutionNode<?> findNextExecutionNode(Graph graph, ExecutionNode<?> current) {
-        Optional<NodePin> execOutPin = current.getPins().stream()
-                .filter(p -> p.getKind() == PinKind.OUTPUT && p.getCategory() == PinCategory.EXECUTION)
-                .findFirst();
+        String targetPinName = current.getNextExecutionPin(current.getLastContext());
+
+        Optional<NodePin> execOutPin;
+
+        if (targetPinName == null) {
+            execOutPin = current.getPins().stream()
+                    .filter(p -> p.getKind() == PinKind.OUTPUT && p.getCategory() == PinCategory.EXECUTION)
+                    .findFirst();
+        } else {
+            execOutPin = current.getPins().stream()
+                    .filter(p -> p.getKind() == PinKind.OUTPUT && p.getCategory() == PinCategory.EXECUTION)
+                    .filter(p -> p.getDisplayName().equals(targetPinName))
+                    .findFirst();
+        }
 
         if (execOutPin.isEmpty()) return null;
 
@@ -102,9 +111,7 @@ public class GraphSimulator {
         NodePin nextInput = connectedInputs.get(0);
         Node<?> nextNode = graph.getNode(nextInput.getNodeId());
 
-        if (nextNode instanceof ExecutionNode) {
-            return (ExecutionNode<?>) nextNode;
-        }
+        if (nextNode instanceof ExecutionNode) return (ExecutionNode<?>) nextNode;
 
         throw new GraphSimulationException(
                 "Execution link leads to a non-ExecutionNode: " + nextNode.getId());

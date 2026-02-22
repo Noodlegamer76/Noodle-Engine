@@ -7,10 +7,23 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 public abstract class ExecutionNode<T extends Node<T>> extends Node<T> {
+    private ExecutionContext lastContext;
 
     protected ExecutionNode(int id, Graph graph, RegistryObject<NodeType<T>> registry, String name, String category) {
         super(id, graph, registry, name, category);
     }
 
     public abstract void execute(StructureExecuter executer, ExecutionContext context, StructureInstance instance);
+
+    public String getNextExecutionPin(ExecutionContext context) {
+        return null;
+    }
+
+    public ExecutionContext getLastContext() {
+        return lastContext;
+    }
+
+    public void setLastContext(ExecutionContext ctx) {
+        this.lastContext = ctx;
+    }
 }

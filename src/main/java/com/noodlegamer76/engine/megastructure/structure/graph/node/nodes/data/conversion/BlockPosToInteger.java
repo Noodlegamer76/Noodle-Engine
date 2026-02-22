@@ -6,7 +6,6 @@ import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.graph.GraphSimulator;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionContext;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.InitNodes;
-import com.noodlegamer76.engine.megastructure.structure.graph.node.NodeType;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ValueNode;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinCategory;
@@ -14,31 +13,36 @@ import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 
-public class IntegerToBlockPos extends ValueNode<IntegerToBlockPos> {
-    GenVar<BlockPos> output = new GenVar<>(new BlockPos(0, 0, 0), GenVarSerializers.BLOCK_POS, false, "Block Pos");
+public class BlockPosToInteger extends ValueNode<BlockPosToInteger> {
+    GenVar<Integer> xOut = new GenVar<>(0, GenVarSerializers.INT, false, "X");
+    GenVar<Integer> yOut = new GenVar<>(0, GenVarSerializers.INT, false, "Y");
+    GenVar<Integer> zOut = new GenVar<>(0, GenVarSerializers.INT, false, "Z");
 
-    public IntegerToBlockPos(int id, Graph graph) {
-        super(id, graph, InitNodes.INT_TO_BLOCK_POS, "Integer to Block Pos", "Data/Conversion");
+    public BlockPosToInteger(int id, Graph graph) {
+        super(id, graph, InitNodes.BLOCK_POS_TO_INT, "Block Pos to Integer", "Data/Conversion");
     }
 
     @Override
     public List<GenVar<?>> evaluate(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
-        Integer xVar = resolve(context, "X", Integer.class);
-        Integer yVar = resolve(context, "Y", Integer.class);
-        Integer zVar = resolve(context, "Z", Integer.class);
+        BlockPos pos = resolve(context, "Block Pos", BlockPos.class);
 
-        int x = xVar == null ? 0 : xVar;
-        int y = yVar == null ? 0 : yVar;
-        int z = zVar == null ? 0 : zVar;
-        output.setValue(new BlockPos(x, y, z));
+        if (pos == null) {
+            xOut.setValue(0);
+            yOut.setValue(0);
+            zOut.setValue(0);
+        } else {
+            xOut.setValue(pos.getX());
+            yOut.setValue(pos.getY());
+            zOut.setValue(pos.getZ());
+        }
 
         return List.of(
-                output
+                xOut,
+                yOut,
+                zOut
         );
     }
 
@@ -49,9 +53,9 @@ public class IntegerToBlockPos extends ValueNode<IntegerToBlockPos> {
 
     @Override
     public void initPins() {
-        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.INPUT, PinCategory.DATA, Integer.class, "X"));
-        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.INPUT, PinCategory.DATA, Integer.class, "Y"));
-        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.INPUT, PinCategory.DATA, Integer.class, "Z"));
-        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.OUTPUT, PinCategory.DATA, BlockPos.class, "Block Pos"));
+        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.INPUT, PinCategory.DATA, BlockPos.class, "Block Pos"));
+        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.OUTPUT, PinCategory.DATA, Integer.class, "X"));
+        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.OUTPUT, PinCategory.DATA, Integer.class, "Y"));
+        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.OUTPUT, PinCategory.DATA, Integer.class, "Z"));
     }
 }

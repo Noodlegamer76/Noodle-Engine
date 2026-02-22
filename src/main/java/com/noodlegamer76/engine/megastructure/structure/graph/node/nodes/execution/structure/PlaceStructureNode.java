@@ -56,7 +56,7 @@ public class PlaceStructureNode extends ExecutionNode<PlaceStructureNode> {
 
         templateOptional.ifPresent((template -> {
             BlockPos chunkMin = ctx.origin();
-            BlockPos chunkMax = chunkMin.offset(15, ctx.level().getMaxBuildHeight() - 1, 15);
+            BlockPos chunkMax = chunkMin.offset(15, ctx.level().getHeight() - 1, 15);
 
             RandomSource random = instance.getRandom(context);
             StructureUtils.placeTemplateInChunk(ctx.level(), template, position, chunkMin, chunkMax, new StructurePlaceSettings(), random, 2);
