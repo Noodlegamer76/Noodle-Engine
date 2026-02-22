@@ -1,6 +1,8 @@
-package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constant;
+package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constants;
 
 import com.google.gson.JsonObject;
+import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
+import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionContext;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.InitNodes;
@@ -11,9 +13,7 @@ import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializers;
 import imgui.ImGui;
-import imgui.extension.imnodes.ImNodes;
 import imgui.type.ImInt;
-import imgui.type.ImString;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class ConstantIntNode extends ValueNode<ConstantIntNode> {
     private final ImInt value = new ImInt();
 
     public ConstantIntNode(int id, Graph graph) {
-        super(id, graph, InitNodes.INT_CONSTANT, "Int Constant", "Values/Primitives");
+        super(id, graph, InitNodes.INT_CONSTANT, "Integer Const", "Data/Constants");
         constant = new GenVar<>(0, GenVarSerializers.INT, false, "Value");
     }
 
@@ -38,7 +38,7 @@ public class ConstantIntNode extends ValueNode<ConstantIntNode> {
     }
 
     @Override
-    public List<GenVar<?>> evaluate(Graph graph, ExecutionContext context) {
+    public List<GenVar<?>> evaluate(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
         constant.setValue(value.get());
         return List.of(constant);
     }

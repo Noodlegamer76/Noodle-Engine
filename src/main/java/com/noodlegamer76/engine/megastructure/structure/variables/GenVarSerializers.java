@@ -1,6 +1,5 @@
 package com.noodlegamer76.engine.megastructure.structure.variables;
 
-import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constant.BlockPosNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;

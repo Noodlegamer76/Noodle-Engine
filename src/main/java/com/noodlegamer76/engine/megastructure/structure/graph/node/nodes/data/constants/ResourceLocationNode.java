@@ -1,6 +1,8 @@
-package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constant;
+package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constants;
 
 import com.google.gson.JsonObject;
+import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
+import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.*;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
@@ -11,7 +13,6 @@ import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializ
 import imgui.ImGui;
 import imgui.type.ImString;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 
@@ -21,12 +22,12 @@ public class ResourceLocationNode extends ValueNode<ResourceLocationNode> {
     private final ImString path = new ImString(256);
 
     public ResourceLocationNode(int id, Graph graph) {
-        super(id, graph, InitNodes.RESOURCE_LOCATION, "Resource Location", "Data/Constants");
+        super(id, graph, InitNodes.RESOURCE_LOCATION, "Resource Location Const", "Data/Constants");
         locationGenVar = new GenVar<>(ResourceLocation.withDefaultNamespace("dummy"), GenVarSerializers.RESOURCE_LOCATION, false, "Resource Location");
     }
 
     @Override
-    public List<GenVar<?>> evaluate(Graph graph, ExecutionContext context) {
+    public List<GenVar<?>> evaluate(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
         locationGenVar.setValue(ResourceLocation.fromNamespaceAndPath(namespace.get(), path.get()));
         return List.of(
                 locationGenVar

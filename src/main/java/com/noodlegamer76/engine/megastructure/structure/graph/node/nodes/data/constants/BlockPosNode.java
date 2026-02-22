@@ -1,10 +1,11 @@
-package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constant;
+package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constants;
 
 import com.google.gson.JsonObject;
+import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
+import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionContext;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.InitNodes;
-import com.noodlegamer76.engine.megastructure.structure.graph.node.NodeType;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ValueNode;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinCategory;
@@ -13,7 +14,6 @@ import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializers;
 import imgui.ImGui;
 import net.minecraft.core.BlockPos;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 
@@ -22,12 +22,12 @@ public class BlockPosNode extends ValueNode<BlockPosNode> {
     private final int[] value = new int[3];
 
     public BlockPosNode(int id, Graph graph) {
-        super(id, graph, InitNodes.BLOCK_POS, "Block Pos", "Data/Constants");
+        super(id, graph, InitNodes.BLOCK_POS, "Block Pos Const", "Data/Constants");
         constant = new GenVar<>(new BlockPos(0, 0, 0), GenVarSerializers.BLOCK_POS, false, "Position");
     }
 
     @Override
-    public List<GenVar<?>> evaluate(Graph graph, ExecutionContext context) {
+    public List<GenVar<?>> evaluate(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
         constant.setValue(new BlockPos(value[0], value[1], value[2]));
         return List.of(
                 constant

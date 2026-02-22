@@ -40,14 +40,15 @@ public class StructMath {
     }
 
     public static RandomSource getNodeRandom(Node node, FeaturePlaceContext<NoneFeatureConfiguration> ctx, int extra) {
-        Vector2f origin = getNodeOrigin(node.getX(), node.getZ(), node.getLevel());
+        long nodeX = node.getX();
+        long nodeZ = node.getZ();
         int nodeSize = getSizeFromLevel(node.getLevel());
 
         long worldSeed = ctx.level().getSeed();
 
         long seed = worldSeed
-                ^ (((long) origin.x) * 341873128712L)
-                ^ (((long) origin.y) * 132897987541L)
+                ^ (nodeX * 341873128712L)
+                ^ (nodeZ * 132897987541L)
                 ^ nodeSize
                 ^ (((long) extra) * 2654435761L);
 

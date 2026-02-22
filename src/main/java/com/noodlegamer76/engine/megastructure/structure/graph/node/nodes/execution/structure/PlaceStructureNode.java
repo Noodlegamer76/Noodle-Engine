@@ -1,5 +1,6 @@
-package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.executor;
+package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.execution.structure;
 
+import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
 import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.StructureUtils;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
@@ -7,36 +8,31 @@ import com.noodlegamer76.engine.megastructure.structure.graph.GraphSimulator;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionContext;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionNode;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.InitNodes;
-import com.noodlegamer76.engine.megastructure.structure.graph.node.NodeType;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinCategory;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
-import com.noodlegamer76.engine.megastructure.structure.placers.StructurePlacer;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
-import net.minecraft.world.phys.AABB;
-import net.minecraftforge.registries.RegistryObject;
-import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.util.Optional;
 
 public class PlaceStructureNode extends ExecutionNode<PlaceStructureNode> {
 
     public PlaceStructureNode(int id, Graph graph) {
-        super(id, graph, InitNodes.PLACE_STRUCTURE, "Place Structure", "Structure");
+        super(id, graph, InitNodes.PLACE_STRUCTURE, "Place Structure", "Execution/Structure");
     }
 
     @Override
-    public void execute(Graph graph, ExecutionContext context, StructureInstance instance) {
+    public void execute(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
+        Graph graph = executer.getFunction();
         NodePin locationPin = getPins().stream()
                 .filter(p -> p.getDisplayName().equals("Structure Location"))
                 .findFirst().orElseThrow();
@@ -62,9 +58,7 @@ public class PlaceStructureNode extends ExecutionNode<PlaceStructureNode> {
             BlockPos chunkMin = ctx.origin();
             BlockPos chunkMax = chunkMin.offset(15, ctx.level().getMaxBuildHeight() - 1, 15);
 
-            GenVar<Long> genVarSeed = context.getGlobalVar("Structure Seed", GenVarSerializers.LONG);
-            if (genVarSeed == null) return;
-            RandomSource random = RandomSource.create(genVarSeed.getValue());
+            RandomSource random = instance.getRandom(context);
             StructureUtils.placeTemplateInChunk(ctx.level(), template, position, chunkMin, chunkMax, new StructurePlaceSettings(), random, 2);
         }));
     }

@@ -28,6 +28,7 @@ public class NodeEditor {
     private final GraphSerializer serializer = new GraphSerializer();
     private StructureExecuter currentStructure;
     private final ImNodesContext context;
+    private boolean pendingPositionReset = false;
 
     private Node<?> draggingNodePreview;
 
@@ -91,29 +92,71 @@ public class NodeEditor {
         ImGui.text("Node Palette");
         ImGui.separator();
 
-        Map<String, List<NodeType<? extends Node<?>>>> grouped = new TreeMap<>();
+        Map<String, Object> tree = new TreeMap<>();
 
         InitNodes.NODE_TYPES.getEntries().forEach(regObj -> {
             NodeType<? extends Node<?>> type = regObj.get();
             Node<?> preview = type.create(-1, currentStructure.getFunction());
             preview.initPins();
 
-            grouped.computeIfAbsent(preview.getCategoryPath(), k -> new ArrayList<>())
-                    .add(type);
+            String[] parts = preview.getCategoryPath().split("/");
+            insertIntoTree(tree, parts, 0, type);
         });
 
-        for (Map.Entry<String, List<NodeType<? extends Node<?>>>> entry : grouped.entrySet()) {
-            if (ImGui.collapsingHeader(entry.getKey())) {
-                for (NodeType<? extends Node<?>> type : entry.getValue()) {
-                    Node<?> preview = type.create(-1, currentStructure.getFunction());
-                    preview.initPins();
+        renderTree(tree);
+    }
 
-                    ImGui.button(preview.getDisplayName());
-                    if (ImGui.isItemActive() && ImGui.isMouseDragging(0)) {
-                        draggingNodeType = type;
-                        draggingNodePreview = preview;
-                    }
+    @SuppressWarnings("unchecked")
+    private void insertIntoTree(Map<String, Object> node, String[] parts, int depth, NodeType<? extends Node<?>> type) {
+        String key = parts[depth];
+        if (depth == parts.length - 1) {
+            node.computeIfAbsent(key, k -> new ArrayList<NodeType<? extends Node<?>>>());
+            Object existing = node.get(key);
+            if (existing instanceof List) {
+                ((List<NodeType<? extends Node<?>>>) existing).add(type);
+            } else if (existing instanceof Map) {
+                ((Map<String, Object>) existing)
+                        .computeIfAbsent("", k -> new ArrayList<NodeType<? extends Node<?>>>());
+                ((List<NodeType<? extends Node<?>>>) ((Map<String, Object>) existing).get("")).add(type);
+            }
+        } else {
+            node.computeIfAbsent(key, k -> new TreeMap<String, Object>());
+            Object existing = node.get(key);
+            if (existing instanceof Map) {
+                insertIntoTree((Map<String, Object>) existing, parts, depth + 1, type);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void renderTree(Map<String, Object> tree) {
+        for (Map.Entry<String, Object> entry : tree.entrySet()) {
+            String label = entry.getKey();
+            Object value = entry.getValue();
+
+            if (value instanceof List) {
+                if (ImGui.collapsingHeader(label)) {
+                    renderNodeButtons((List<NodeType<? extends Node<?>>>) value);
                 }
+            } else if (value instanceof Map) {
+                if (ImGui.collapsingHeader(label)) {
+                    ImGui.indent();
+                    renderTree((Map<String, Object>) value);
+                    ImGui.unindent();
+                }
+            }
+        }
+    }
+
+    private void renderNodeButtons(List<NodeType<? extends Node<?>>> types) {
+        for (NodeType<? extends Node<?>> type : types) {
+            Node<?> preview = type.create(-1, currentStructure.getFunction());
+            preview.initPins();
+
+            ImGui.button(preview.getDisplayName());
+            if (ImGui.isItemActive() && ImGui.isMouseDragging(0)) {
+                draggingNodeType = type;
+                draggingNodePreview = preview;
             }
         }
     }
@@ -149,6 +192,13 @@ public class NodeEditor {
 
         for (Node<?> node : currentStructure.getFunction().getNodes().values()) {
             node.render();
+        }
+
+        if (pendingPositionReset) {
+            for (Node<?> node : currentStructure.getFunction().getNodes().values()) {
+                ImNodes.setNodeEditorSpacePos(node.getId(), node.x, node.y);
+            }
+            pendingPositionReset = false;
         }
 
         for (Link link : currentStructure.getFunction().getLinks()) {
@@ -223,10 +273,7 @@ public class NodeEditor {
 
     public void setCurrentStructure(StructureExecuter currentStructure) {
         this.currentStructure = currentStructure;
-
-        for (Node<?> node : currentStructure.getFunction().getNodes().values()) {
-            ImNodes.setNodeEditorSpacePos(node.getId(), node.x, node.y);
-        }
+        pendingPositionReset = true;
     }
 
     public GraphSerializer getSerializer() {

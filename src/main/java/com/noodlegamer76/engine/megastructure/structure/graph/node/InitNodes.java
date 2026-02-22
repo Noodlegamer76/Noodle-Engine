@@ -1,20 +1,19 @@
 package com.noodlegamer76.engine.megastructure.structure.graph.node;
 
 import com.noodlegamer76.engine.NoodleEngine;
-import com.noodlegamer76.engine.core.component.ComponentType;
-import com.noodlegamer76.engine.core.component.InitComponents;
 import com.noodlegamer76.engine.event.NoodleEngineRegistries;
-import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.Vec3Node;
-import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constant.BlockPosNode;
-import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constant.ConstantIntNode;
-import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constant.ResourceLocationNode;
-import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.executor.PlaceStructureNode;
-import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.executor.StartNode;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constants.Vec3Node;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constants.BlockPosNode;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constants.ConstantIntNode;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constants.ResourceLocationNode;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.position.BlockPosWorldToNodeSpace;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.conversion.IntegerToBlockPos;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.random.RandomInt;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.execution.structure.PlaceStructureNode;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.flow.StartNode;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
-
-import javax.json.JsonValue;
 
 public class InitNodes {
     public static final DeferredRegister<NodeType<? extends Node<?>>> NODE_TYPES = DeferredRegister.create(NoodleEngineRegistries.NODE_TYPE, NoodleEngine.MODID);
@@ -36,6 +35,15 @@ public class InitNodes {
 
     public static final RegistryObject<NodeType<StartNode>> START =
             NODE_TYPES.register("start", () -> new NodeType<>(StartNode::new));
+
+    public static final RegistryObject<NodeType<IntegerToBlockPos>> INT_TO_BLOCK_POS =
+            NODE_TYPES.register("int_to_block_pos", () -> new NodeType<>(IntegerToBlockPos::new));
+
+    public static final RegistryObject<NodeType<RandomInt>> RANDOM_INT =
+            NODE_TYPES.register("random_int", () -> new NodeType<>(RandomInt::new));
+
+    public static final RegistryObject<NodeType<BlockPosWorldToNodeSpace>> BLOCK_POS_WORLD_TO_NODE_SPACE =
+            NODE_TYPES.register("block_pos_world_to_node_space", () -> new NodeType<>(BlockPosWorldToNodeSpace::new));
 
 
     public static RegistryObject<NodeType<? extends Node<?>>> getComponentType(ResourceLocation id) {

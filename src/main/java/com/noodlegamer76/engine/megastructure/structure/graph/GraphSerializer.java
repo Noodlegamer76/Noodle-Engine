@@ -139,8 +139,8 @@ public class GraphSerializer {
                     }
                 }
 
-                node.x = nodeJson.has("x") ? nodeJson.get("x").getAsInt() : 0;
-                node.y = nodeJson.has("y") ? nodeJson.get("y").getAsInt() : 0;
+                node.x = nodeJson.has("x") ? nodeJson.get("x").getAsFloat() : 0f;
+                node.y = nodeJson.has("y") ? nodeJson.get("y").getAsFloat() : 0f;
 
                 JsonArray pinsArray = nodeJson.getAsJsonArray("pins");
 
@@ -295,8 +295,8 @@ public class GraphSerializer {
                 }
             }
 
-            node.x = nodeJson.has("x") ? nodeJson.get("x").getAsInt() : 0;
-            node.y = nodeJson.has("y") ? nodeJson.get("y").getAsInt() : 0;
+            node.x = nodeJson.has("x") ? nodeJson.get("x").getAsFloat() : 0f;
+            node.y = nodeJson.has("y") ? nodeJson.get("y").getAsFloat() : 0f;
 
             for (JsonElement elem : nodeJson.getAsJsonArray("pins")) {
                 JsonObject pinJson = elem.getAsJsonObject();

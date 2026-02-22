@@ -1,5 +1,7 @@
 package com.noodlegamer76.engine.megastructure.structure.graph.node;
 
+import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
+import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import net.minecraftforge.registries.DeferredRegister;
@@ -13,5 +15,5 @@ public abstract class ValueNode<T extends Node<T>> extends Node<T> {
         super(id, graph, registry, name, category);
     }
 
-    public abstract List<GenVar<?>> evaluate(Graph graph, ExecutionContext context);
+    public abstract List<GenVar<?>> evaluate(StructureExecuter executer, ExecutionContext context, StructureInstance instance);
 }

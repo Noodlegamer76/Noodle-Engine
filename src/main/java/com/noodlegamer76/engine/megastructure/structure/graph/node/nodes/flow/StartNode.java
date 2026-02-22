@@ -1,5 +1,6 @@
-package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.executor;
+package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.flow;
 
+import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
 import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionContext;
@@ -16,7 +17,7 @@ public class StartNode extends ExecutionNode<StartNode> {
     }
 
     @Override
-    public void execute(Graph graph, ExecutionContext context, StructureInstance instance) {
+    public void execute(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
         //Let the simulator just move to the next execution node
     }
 

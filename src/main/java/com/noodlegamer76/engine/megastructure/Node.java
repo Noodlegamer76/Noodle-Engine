@@ -1,5 +1,9 @@
 package com.noodlegamer76.engine.megastructure;
 
+import com.noodlegamer76.engine.megastructure.structure.StructureUtils;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+
 import java.util.Objects;
 
 public class Node {
@@ -9,11 +13,11 @@ public class Node {
     private final int size;
 
     public Node(int worldX, int worldZ, int level) {
-        int nodeSize = 16 << level; // 16 * 2^level
-        this.x = (worldX / nodeSize) * nodeSize;
-        this.z = (worldZ / nodeSize) * nodeSize;
+        Vector2f nodeOrigin = StructMath.getNodeOrigin(worldX, worldZ, level);
+        this.x = (int) nodeOrigin.x;
+        this.z = (int) nodeOrigin.y;
         this.level = level;
-        this.size = nodeSize;
+        this.size = StructMath.getSizeFromLevel(level);
     }
 
     public int getLevel() {

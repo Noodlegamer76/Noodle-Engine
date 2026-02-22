@@ -43,7 +43,6 @@ public class StructureEditor {
 
     public void saveStructureExecuter(int priority, String name, Graph function, int nodeLevel) {
         NodeEditor nodeEditor = getNodeEditor();
-        nodeEditor.setNodePositions();
         StructureExecuter executer = new StructureExecuter(priority, name, function, nodeLevel);
         GraphSerializer.serialize(structureDefinition.getId(), executer);
         structureDefinition.addStructureExecuter(executer);
@@ -74,15 +73,18 @@ public class StructureEditor {
     }
 
     public void openStructureDefinition(StructureDefinition structureDefinition) {
+        nodeEditor.setNodePositions();
         this.structureDefinition = structureDefinition;
     }
 
     public void createAndOpenStructureDefinition(String name) {
+        nodeEditor.setNodePositions();
         this.structureDefinition = new StructureDefinition(name);
     }
 
     public void createAndOpenNewStructureExecuter(String name, int priority, int nodeLevel) {
         Graph function = new Graph();
+        nodeEditor.setNodePositions();
         StructureExecuter executer = new StructureExecuter(priority, name, function, nodeLevel);
         structureDefinition.addStructureExecuter(executer);
         GraphSerializer.serialize(structureDefinition.getId(), executer);

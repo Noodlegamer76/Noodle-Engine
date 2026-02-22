@@ -9,6 +9,7 @@ import com.noodlegamer76.engine.megastructure.structure.placers.Placer;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializer;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializers;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -24,6 +25,7 @@ public class StructureInstance {
     private final GraphSimulator simulator = new GraphSimulator();
     private final FeaturePlaceContext<NoneFeatureConfiguration> ctx;
     private final List<Placer> placers = new ArrayList<>();
+    private final Map<ExecutionContext, RandomSource> randoms = new HashMap<>();
 
     public StructureInstance(StructureDefinition definition, FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
         this.definition = definition;
@@ -40,6 +42,7 @@ public class StructureInstance {
         for (Placer placer: getPlacers()) {
             placer.place(ctx,ctx.random(), this);
         }
+        placers.clear();
     }
 
     private void processExecuterForNodes(FeaturePlaceContext<NoneFeatureConfiguration> ctx, StructureExecuter executer) {
@@ -49,7 +52,7 @@ public class StructureInstance {
 
         for (Node node : nodes) {
             ExecutionContext nodeContext = createExecutionContext(ctx, node, executer);
-            simulator.run(executer.getFunction(), nodeContext, this);
+            simulator.run(executer, nodeContext, this);
         }
     }
 
@@ -57,7 +60,18 @@ public class StructureInstance {
         ExecutionContext nodeContext = new ExecutionContext();
         RandomSource random = StructMath.getNodeRandom(node, ctx, executer.getId());
         nodeContext.addGlobalVar(new GenVar<>(random.nextLong(), GenVarSerializers.LONG, true, "Structure Seed"));
+        nodeContext.addGlobalVar(new GenVar<>(new BlockPos(node.getX(), 0, node.getZ()), GenVarSerializers.BLOCK_POS, true, "Node Origin"));
         return nodeContext;
+    }
+
+    public RandomSource getRandom(ExecutionContext context) {
+        if (randoms.containsKey(context)) return randoms.get(context);
+
+        long seed = context.getGlobalVar("Structure Seed", GenVarSerializers.LONG).getValue();
+        RandomSource random = RandomSource.create(seed);
+        context.addGlobalVar(new GenVar<>(random.nextLong(), GenVarSerializers.LONG, true, "Structure Seed"));
+        randoms.put(context, random);
+        return random;
     }
 
     public StructureDefinition getDefinition() {
