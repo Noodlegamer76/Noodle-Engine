@@ -14,36 +14,45 @@ import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializers;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import imgui.type.ImString;
+import net.minecraft.core.Direction;
 
 import java.util.List;
 
-public class BooleanConstantNode extends ValueNode<BooleanConstantNode> {
-    private final GenVar<Boolean> constant;
-    private ImBoolean value = new ImBoolean(false);
+public class DirectionConstant extends ValueNode<DirectionConstant> {
+    private final GenVar<Direction> constant;
+    private Direction direction = Direction.UP;
     private final ImString name = new ImString(256);
 
-    public BooleanConstantNode(int id, Graph graph) {
-        super(id, graph, InitNodes.BOOLEAN_CONSTANT, "Boolean Const", "Data/Constants");
-        constant = new GenVar<>(false, Boolean.class, false, "Value");
+    public DirectionConstant(int id, Graph graph) {
+        super(id, graph, InitNodes.DIRECTION_CONSTANT, "Direction Const", "Data/Constants");
+        constant = new GenVar<>(Direction.UP, Direction.class, false, "Value");
     }
 
     @Override
     protected void renderContents() {
         ImGui.setNextItemWidth(280f);
         ImGui.inputText("Name##" + getId(), name);
-        ImGui.checkbox("Value##" + getId(), value);
+        ImGui.setNextItemWidth(280f);
+        if (ImGui.beginCombo("Value##" + getId(), direction.getSerializedName())) {
+            for (Direction direction : Direction.values()) {
+                if (ImGui.selectable(direction.getSerializedName())) {
+                    this.direction = direction;
+                }
+            }
+            ImGui.endCombo();
+        }
     }
 
     @Override
     public void initPins() {
-        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.OUTPUT, PinCategory.DATA, Boolean.class, "Value"));
+        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.OUTPUT, PinCategory.DATA, Direction.class, "Value"));
     }
 
     @Override
     public List<GenVar<?>> evaluate(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
-        constant.setValue(value.get());
+        constant.setValue(direction);
         return List.of(constant);
     }
 
@@ -51,14 +60,14 @@ public class BooleanConstantNode extends ValueNode<BooleanConstantNode> {
     public JsonObject saveData() {
         JsonObject data = super.saveData();
         data.addProperty("name", name.get());
-        data.addProperty("value", value.get());
+        data.addProperty("value", direction.ordinal());
         return data;
     }
 
     @Override
     public void loadData(JsonObject data) {
         name.set(data.get("name").getAsString());
-        value.set(data.get("value").getAsBoolean());
+        direction = Direction.values()[data.get("value").getAsInt()];
     }
 
     @Override

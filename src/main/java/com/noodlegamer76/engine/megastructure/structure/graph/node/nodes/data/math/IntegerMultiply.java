@@ -16,7 +16,7 @@ import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializ
 import java.util.List;
 
 public class IntegerMultiply extends ValueNode<IntegerMultiply> {
-    GenVar<Integer> output = new GenVar<>(0, GenVarSerializers.INT, false, "Output");
+    GenVar<Integer> output = new GenVar<>(0, Integer.class, false, "Output");
 
     public IntegerMultiply(int id, Graph graph) {
         super(id, graph, InitNodes.INTEGER_MULTIPLY, "Integer: Multiply", "Data/Math");

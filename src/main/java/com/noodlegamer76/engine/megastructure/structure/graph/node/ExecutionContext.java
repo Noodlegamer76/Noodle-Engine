@@ -12,6 +12,7 @@ import java.util.Map;
 
 public class ExecutionContext {
     private final Map<Integer, List<GenVar<?>>> localVariables = new HashMap<>();
+    private final Map<String, GenVar<?>> namedLocalVariables = new HashMap<>();
     private final Map<String, GenVar<?>> globalVariables = new HashMap<>();
 
     public void addGlobalVar(GenVar<?> genVar) {
@@ -23,13 +24,22 @@ public class ExecutionContext {
         cachedVars.add(genVar);
     }
 
+    public void setLocalVar(String name, GenVar<?> var) {
+        namedLocalVariables.put(name, var);
+    }
+
+    @Nullable
+    public GenVar<?> getLocalVar(String name) {
+        return namedLocalVariables.get(name);
+    }
+
     @Nullable
     @SuppressWarnings("unchecked")
-    public <T> GenVar<T> getGlobalVar(String name, GenVarSerializer<T> serializer) {
+    public <T> GenVar<T> getGlobalVar(String name, Class<T> clazz) {
         GenVar<?> raw = globalVariables.get(name);
         if (raw == null) return null;
 
-        if (raw.getSerializer() != serializer) {
+        if (raw.getClazz() != clazz) {
             NoodleEngine.LOGGER.error("Serializer mismatch for GenVar: " + name);
             return null;
         }
@@ -37,12 +47,17 @@ public class ExecutionContext {
         return (GenVar<T>) raw;
     }
 
+    public void invalidateCachedVar(int id) {
+        localVariables.remove(id);
+    }
+
     @Nullable
-    public <T> List<GenVar<?>> getLocalVars(int id) {
+    public List<GenVar<?>> getLocalVars(int id) {
         return localVariables.get(id);
     }
 
     public void clear() {
         localVariables.clear();
+        namedLocalVariables.clear();
     }
 }

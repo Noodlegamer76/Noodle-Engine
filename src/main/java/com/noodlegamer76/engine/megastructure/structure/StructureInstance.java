@@ -5,6 +5,7 @@ import com.noodlegamer76.engine.megastructure.Node;
 import com.noodlegamer76.engine.megastructure.StructMath;
 import com.noodlegamer76.engine.megastructure.structure.graph.GraphSimulator;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionContext;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.ExecutionNode;
 import com.noodlegamer76.engine.megastructure.structure.placers.Placer;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializer;
@@ -33,43 +34,39 @@ public class StructureInstance {
     }
 
     public void generate(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
-        for (List<StructureExecuter> executerList : definition.getStructureExecuters().values()) {
-            for (StructureExecuter executer : executerList) {
-                processExecuterForNodes(ctx, executer);
+        Node centerNode = new Node(ctx.origin().getX(), ctx.origin().getZ(), 0);
+        List<Node> nodes = StructMath.get3x3Nodes(centerNode);
+
+        for (Node node : nodes) {
+            ExecutionContext nodeContext = createExecutionContext(ctx, node);
+
+            for (List<StructureExecuter> executerList : definition.getStructureExecuters().values()) {
+                for (StructureExecuter executer : executerList) {
+                    simulator.run(executer, nodeContext, this);
+                }
             }
         }
 
-        for (Placer placer: getPlacers()) {
-            placer.place(ctx,ctx.random(), this);
+        for (Placer placer : getPlacers()) {
+            placer.place(ctx, ctx.random(), this);
         }
         placers.clear();
     }
 
-    private void processExecuterForNodes(FeaturePlaceContext<NoneFeatureConfiguration> ctx, StructureExecuter executer) {
-        int level = executer.getNodeLevel();
-        Node centerNode = new Node(ctx.origin().getX(), ctx.origin().getZ(), level);
-        List<Node> nodes = StructMath.get3x3Nodes(centerNode);
-
-        for (Node node : nodes) {
-            ExecutionContext nodeContext = createExecutionContext(ctx, node, executer);
-            simulator.run(executer, nodeContext, this);
-        }
-    }
-
-    private ExecutionContext createExecutionContext(FeaturePlaceContext<NoneFeatureConfiguration> ctx, Node node, StructureExecuter executer) {
+    private ExecutionContext createExecutionContext(FeaturePlaceContext<NoneFeatureConfiguration> ctx, Node node) {
         ExecutionContext nodeContext = new ExecutionContext();
-        RandomSource random = StructMath.getNodeRandom(node, ctx, executer.getId());
-        nodeContext.addGlobalVar(new GenVar<>(random.nextLong(), GenVarSerializers.LONG, true, "Structure Seed"));
-        nodeContext.addGlobalVar(new GenVar<>(new BlockPos(node.getX(), 0, node.getZ()), GenVarSerializers.BLOCK_POS, true, "Node Origin"));
+        RandomSource random = StructMath.getNodeRandom(node, ctx, definition.getId().hashCode());
+        nodeContext.addGlobalVar(new GenVar<>(random.nextLong(), Long.class, true, "Structure Seed"));
+        nodeContext.addGlobalVar(new GenVar<>(new BlockPos(node.getX(), 0, node.getZ()), BlockPos.class, true, "Node Origin"));
         return nodeContext;
     }
 
     public RandomSource getRandom(ExecutionContext context) {
         if (randoms.containsKey(context)) return randoms.get(context);
 
-        long seed = context.getGlobalVar("Structure Seed", GenVarSerializers.LONG).getValue();
+        long seed = context.getGlobalVar("Structure Seed", Long.class).getValue();
         RandomSource random = RandomSource.create(seed);
-        context.addGlobalVar(new GenVar<>(random.nextLong(), GenVarSerializers.LONG, true, "Structure Seed"));
+        context.addGlobalVar(new GenVar<>(random.nextLong(), Long.class, true, "Structure Seed"));
         randoms.put(context, random);
         return random;
     }
@@ -88,5 +85,9 @@ public class StructureInstance {
 
     public void addPlacer(Placer placer) {
         placers.add(placer);
+    }
+
+    public GraphSimulator getSimulator() {
+        return simulator;
     }
 }

@@ -2,8 +2,11 @@ package com.noodlegamer76.engine.megastructure.structure.graph.node;
 
 import com.google.gson.JsonObject;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
+import com.noodlegamer76.engine.megastructure.structure.graph.GraphSimulator;
+import com.noodlegamer76.engine.megastructure.structure.graph.InspectorVariable;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
+import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import imgui.extension.imnodes.ImNodes;
 import imgui.ImGui;
 import net.minecraftforge.registries.DeferredRegister;
@@ -49,7 +52,7 @@ public abstract class Node<T extends Node<T>> {
         return categoryPath;
     }
 
-    protected void addPin(NodePin pin) {
+    public void addPin(NodePin pin) {
         pins.add(pin);
         pinsByDisplayName.put(pin.getDisplayName(), pin);
     }
@@ -102,6 +105,19 @@ public abstract class Node<T extends Node<T>> {
 
     public NodePin getPin(String displayName) {
         return pinsByDisplayName.get(displayName);
+    }
+
+    protected <V> V resolve(ExecutionContext context, String pinName, Class<V> type) {
+        return GraphSimulator.resolveInputByPin(getGraph(), context, getPin(pinName), type);
+    }
+
+    protected <V> V resolve(ExecutionContext context, String pinName, Class<V> type, V defaultValue) {
+        V value = resolve(context, pinName, type);
+        return value != null ? value : defaultValue;
+    }
+
+    public List<InspectorVariable> getInspectorVariables() {
+        return List.of();
     }
 
     protected abstract void renderContents();

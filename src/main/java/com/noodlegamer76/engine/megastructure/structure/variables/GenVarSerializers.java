@@ -1,6 +1,7 @@
 package com.noodlegamer76.engine.megastructure.structure.variables;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
@@ -34,5 +35,9 @@ public class GenVarSerializers {
                 tag.putInt(name + "_z", value.getZ());
             }),
             ((tag, name) -> new BlockPos(tag.getInt(name + "_x"), tag.getInt(name + "_y"), tag.getInt(name + "_z")))
+    );
+    public static final GenVarSerializer<Direction> DIRECTION = GenVarSerializer.create(
+            ((tag, name, value) -> tag.putInt(name, value.ordinal())),
+            ((tag, name) -> Direction.values()[tag.getInt(name)])
     );
 }

@@ -2,6 +2,8 @@ package com.noodlegamer76.engine.megastructure.structure.graph.node;
 
 import com.noodlegamer76.engine.NoodleEngine;
 import com.noodlegamer76.engine.event.NoodleEngineRegistries;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.GetLocalVariable;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.SetLocalVariable;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.constants.*;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.conversion.BlockPosToInteger;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.logic.*;
@@ -13,8 +15,10 @@ import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.po
 import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.position.BlockPosSubtractNodePos;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data.random.RandomInt;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.execution.structure.PlaceStructureNode;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.execution.structure.StackedPlaceStructureNode;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.flow.IfNode;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.flow.StartNode;
+import com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.flow.WhileLoopNode;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -25,11 +29,17 @@ public class InitNodes {
     public static final RegistryObject<NodeType<ConstantIntNode>> INT_CONSTANT =
             NODE_TYPES.register("value_node", () -> new NodeType<>(ConstantIntNode::new));
 
+    public static final RegistryObject<NodeType<DirectionConstant>> DIRECTION_CONSTANT =
+            NODE_TYPES.register("direction_constant", () -> new NodeType<>(DirectionConstant::new));
+
     public static final RegistryObject<NodeType<Vec3Node>> VEC3_NODE =
             NODE_TYPES.register("vec3_node", () -> new NodeType<>(Vec3Node::new));
 
     public static final RegistryObject<NodeType<PlaceStructureNode>> PLACE_STRUCTURE =
             NODE_TYPES.register("place_structure", () -> new NodeType<>(PlaceStructureNode::new));
+
+    public static final RegistryObject<NodeType<StackedPlaceStructureNode>> STACKED_PLACE_STRUCTURE =
+            NODE_TYPES.register("stacked_place_structure", () -> new NodeType<>(StackedPlaceStructureNode::new));
 
     public static final RegistryObject<NodeType<ResourceLocationNode>> RESOURCE_LOCATION =
             NODE_TYPES.register("resource_location", () -> new NodeType<>(ResourceLocationNode::new));
@@ -102,6 +112,15 @@ public class InitNodes {
 
     public static final RegistryObject<NodeType<IfNode>> IF =
             NODE_TYPES.register("if", () -> new NodeType<>(IfNode::new));
+
+    public static final RegistryObject<NodeType<WhileLoopNode>> WHILE =
+            NODE_TYPES.register("while", () -> new NodeType<>(WhileLoopNode::new));
+
+    public static final RegistryObject<NodeType<GetLocalVariable>> GET_LOCAL_VAR =
+            NODE_TYPES.register("get_local_var", () -> new NodeType<>(GetLocalVariable::new));
+
+    public static final RegistryObject<NodeType<SetLocalVariable>> SET_LOCAL_VAR =
+            NODE_TYPES.register("set_local_var", () -> new NodeType<>(SetLocalVariable::new));
 
 
     public static RegistryObject<NodeType<? extends Node<?>>> getComponentType(ResourceLocation id) {

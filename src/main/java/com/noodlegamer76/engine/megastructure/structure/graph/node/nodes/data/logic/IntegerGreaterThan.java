@@ -16,7 +16,7 @@ import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializ
 import java.util.List;
 
 public class IntegerGreaterThan extends ValueNode<IntegerGreaterThan> {
-    GenVar<Boolean> output = new GenVar<>(false, GenVarSerializers.BOOLEAN, false, "Output");
+    GenVar<Boolean> output = new GenVar<>(false, Boolean.class, false, "Output");
 
     public IntegerGreaterThan(int id, Graph graph) {
         super(id, graph, InitNodes.INTEGER_GREATER_THAN, "Integer: Greater Than", "Data/Logic");

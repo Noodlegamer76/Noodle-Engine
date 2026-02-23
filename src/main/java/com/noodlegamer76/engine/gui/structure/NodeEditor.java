@@ -3,6 +3,7 @@ package com.noodlegamer76.engine.gui.structure;
 import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.graph.GraphSerializer;
+import com.noodlegamer76.engine.megastructure.structure.graph.InspectorVariable;
 import com.noodlegamer76.engine.megastructure.structure.graph.Link;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.InitNodes;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.Node;
@@ -19,10 +20,7 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import net.minecraft.client.gui.GuiGraphics;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class NodeEditor {
     private final GraphSerializer serializer = new GraphSerializer();
@@ -56,13 +54,19 @@ public class NodeEditor {
         ImGui.setNextWindowSize(ImGui.getMainViewport().getWorkSizeX(),
                 ImGui.getMainViewport().getWorkSizeY());
 
+        float leftWidth = 250f;
+        float inspectorWidth = 500;
+
+        ImGui.setNextWindowPos(ImGui.getMainViewport().getWorkPosX(),
+                ImGui.getMainViewport().getWorkPosY());
+
+        ImGui.setNextWindowSize(ImGui.getMainViewport().getWorkSizeX() - inspectorWidth,
+                ImGui.getMainViewport().getWorkSizeY());
+
         ImGui.begin("Structure Editor", windowFlags);
 
         float totalWidth = ImGui.getContentRegionAvailX();
         float totalHeight = ImGui.getContentRegionAvailY();
-
-        float leftWidth = 250f;
-        float rightWidth = 300f;
 
         ImGui.beginChild("LeftPanel", leftWidth, totalHeight, true);
         renderLeftPanel();
@@ -70,19 +74,9 @@ public class NodeEditor {
 
         ImGui.sameLine();
 
-        ImGui.beginChild("NodeEditorPanel",
-                totalWidth - leftWidth - rightWidth,
-                totalHeight,
-                false);
-
+        ImGui.beginChild("NodeEditorPanel", totalWidth - leftWidth, totalHeight, false);
         renderNodeEditor();
         handleNodeDrop();
-        ImGui.endChild();
-
-        ImGui.sameLine();
-
-        ImGui.beginChild("RightPanel", rightWidth, totalHeight, true);
-        ImGui.text("Inspector");
         ImGui.endChild();
 
         ImGui.end();
@@ -110,21 +104,13 @@ public class NodeEditor {
     private void insertIntoTree(Map<String, Object> node, String[] parts, int depth, NodeType<? extends Node<?>> type) {
         String key = parts[depth];
         if (depth == parts.length - 1) {
-            node.computeIfAbsent(key, k -> new ArrayList<NodeType<? extends Node<?>>>());
-            Object existing = node.get(key);
-            if (existing instanceof List) {
-                ((List<NodeType<? extends Node<?>>>) existing).add(type);
-            } else if (existing instanceof Map) {
-                ((Map<String, Object>) existing)
-                        .computeIfAbsent("", k -> new ArrayList<NodeType<? extends Node<?>>>());
-                ((List<NodeType<? extends Node<?>>>) ((Map<String, Object>) existing).get("")).add(type);
-            }
+            node.computeIfAbsent(key, k -> new TreeMap<String, Object>());
+            Map<String, Object> category = (Map<String, Object>) node.get(key);
+            category.computeIfAbsent("__nodes__", k -> new ArrayList<NodeType<? extends Node<?>>>());
+            ((List<NodeType<? extends Node<?>>>) category.get("__nodes__")).add(type);
         } else {
             node.computeIfAbsent(key, k -> new TreeMap<String, Object>());
-            Object existing = node.get(key);
-            if (existing instanceof Map) {
-                insertIntoTree((Map<String, Object>) existing, parts, depth + 1, type);
-            }
+            insertIntoTree((Map<String, Object>) node.get(key), parts, depth + 1, type);
         }
     }
 
@@ -134,10 +120,8 @@ public class NodeEditor {
             String label = entry.getKey();
             Object value = entry.getValue();
 
-            if (value instanceof List) {
-                if (ImGui.collapsingHeader(label)) {
-                    renderNodeButtons((List<NodeType<? extends Node<?>>>) value);
-                }
+            if (label.equals("__nodes__")) {
+                renderNodeButtons((List<NodeType<? extends Node<?>>>) value);
             } else if (value instanceof Map) {
                 if (ImGui.collapsingHeader(label)) {
                     ImGui.indent();
@@ -260,7 +244,7 @@ public class NodeEditor {
             Class<?> startType = start.getDataType();
             Class<?> endType = end.getDataType();
 
-            if (startType == null || endType == null) return false;
+            if (startType == Object.class || endType == Object.class) return true;
             return endType.isAssignableFrom(startType);
         }
 

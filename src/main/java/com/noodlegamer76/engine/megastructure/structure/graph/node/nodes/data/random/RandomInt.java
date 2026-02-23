@@ -24,7 +24,7 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.List;
 
 public class RandomInt extends ValueNode<RandomInt> {
-    GenVar<Integer> output = new GenVar<>(0, GenVarSerializers.INT, false, "Random Int");
+    GenVar<Integer> output = new GenVar<>(0, Integer.class, false, "Random Int");
     ImInt from = new ImInt(0);
     ImInt to = new ImInt(100);
 

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
 import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
+import com.noodlegamer76.engine.megastructure.structure.graph.InspectorVariable;
 import com.noodlegamer76.engine.megastructure.structure.graph.node.*;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinCategory;
@@ -20,10 +21,11 @@ public class ResourceLocationNode extends ValueNode<ResourceLocationNode> {
     private final GenVar<ResourceLocation> locationGenVar;
     private final ImString namespace = new ImString(256);
     private final ImString path = new ImString(256);
+    private final ImString name = new ImString(256);
 
     public ResourceLocationNode(int id, Graph graph) {
         super(id, graph, InitNodes.RESOURCE_LOCATION, "Resource Location Const", "Data/Constants");
-        locationGenVar = new GenVar<>(ResourceLocation.withDefaultNamespace("dummy"), GenVarSerializers.RESOURCE_LOCATION, false, "Resource Location");
+        locationGenVar = new GenVar<>(ResourceLocation.withDefaultNamespace("dummy"), ResourceLocation.class, false, "Resource Location");
     }
 
     @Override
@@ -36,9 +38,11 @@ public class ResourceLocationNode extends ValueNode<ResourceLocationNode> {
 
     @Override
     protected void renderContents() {
-        ImGui.setNextItemWidth(120f);
+        ImGui.setNextItemWidth(280f);
+        ImGui.inputText("Name##" + getId(), name);
+        ImGui.setNextItemWidth(280f);
         ImGui.inputText("Namespace##" + getId(), namespace);
-        ImGui.setNextItemWidth(240);
+        ImGui.setNextItemWidth(280f);
         ImGui.inputText("Path##" + getId(), path);
     }
 
@@ -50,6 +54,7 @@ public class ResourceLocationNode extends ValueNode<ResourceLocationNode> {
     @Override
     public JsonObject saveData() {
         JsonObject data = new JsonObject();
+        data.addProperty("name", name.get());
         data.addProperty("namespace", namespace.get());
         data.addProperty("path", path.get());
         return data;
@@ -57,7 +62,15 @@ public class ResourceLocationNode extends ValueNode<ResourceLocationNode> {
 
     @Override
     public void loadData(JsonObject data) {
+        name.set(data.get("name").getAsString());
         if (data.has("namespace")) namespace.set(data.get("namespace").getAsString());
         if (data.has("path")) path.set(data.get("path").getAsString());
+    }
+
+    @Override
+    public List<InspectorVariable> getInspectorVariables() {
+        return List.of(
+                new InspectorVariable(name, locationGenVar, this::renderContents)
+        );
     }
 }

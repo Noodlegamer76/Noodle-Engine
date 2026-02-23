@@ -175,7 +175,7 @@ public class GraphSerializer {
                             pinDisplayName
                     );
 
-                    node.getPins().add(pin);
+                    node.addPin(pin);
                     pinsById.put(pinId, pin);
                 }
 
@@ -315,7 +315,7 @@ public class GraphSerializer {
                         dataType,
                         pinJson.get("name").getAsString()
                 );
-                node.getPins().add(pin);
+                node.addPin(pin);
                 pinsById.put(pin.getId(), pin);
             }
             graph.addNode(node);

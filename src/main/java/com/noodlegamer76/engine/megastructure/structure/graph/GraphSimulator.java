@@ -14,12 +14,18 @@ import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import java.util.*;
 
 public class GraphSimulator {
+    public static final int MAX_DEFERRED_EXECUTIONS = 1000;
+    private int deferredExecutionCount = 0;
+    private final List<ExecutionNode<?>> executeLast = new ArrayList<>();
+
 
     public void run(StructureExecuter executer, StructureInstance instance) {
         run(executer, new ExecutionContext(), instance);
     }
 
     public void run(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
+        executeLast.clear();
+        deferredExecutionCount = 0;
         context.clear();
         Graph graph = executer.getFunction();
         ExecutionNode<?> entry = findEntryNode(graph);
@@ -31,8 +37,15 @@ public class GraphSimulator {
         Graph graph = executer.getFunction();
         ExecutionNode<?> current = startNode;
         Set<Integer> visited = new HashSet<>();
+        boolean transitioningToDeferred = false;
 
         while (current != null) {
+            if (transitioningToDeferred) {
+                visited.clear();
+                invalidateAllNonCacheable(graph, context);
+                transitioningToDeferred = false;
+            }
+
             if (!visited.add(current.getId())) {
                 throw new GraphSimulationException(
                         "Cycle detected in execution flow at node: " + current.getId());
@@ -41,13 +54,32 @@ public class GraphSimulator {
             resolveDataInputs(executer, context, current, instance);
             current.execute(executer, context, instance);
 
-            current = findNextExecutionNode(graph, current);
+            ExecutionNode<?> next = findNextExecutionNode(graph, current, instance);
+
+            if (next == null && !executeLast.isEmpty()) {
+                transitioningToDeferred = true;
+                next = extractEndNode(instance);
+            }
+
+            current = next;
+        }
+    }
+
+    private void invalidateAllNonCacheable(Graph graph, ExecutionContext context) {
+        for (Node<?> node : graph.getNodes().values()) {
+            if (node instanceof ValueNode && !((ValueNode<?>) node).isCacheable()) {
+                invalidateDownstream(graph, context, node);
+            }
         }
     }
 
     public List<GenVar<?>> evaluateValues(StructureExecuter executer, ExecutionContext context, ValueNode<?> node, StructureInstance instance) {
         List<GenVar<?>> cached = context.getLocalVars(node.getId());
-        if (cached != null) return cached;
+        if (cached != null && node.isCacheable()) return cached;
+
+        if (!node.isCacheable()) {
+            invalidateDownstream(executer.getFunction(), context, node);
+        }
 
         resolveDataInputs(executer, context, node, instance);
 
@@ -62,6 +94,20 @@ public class GraphSimulator {
             }
         }
         return result;
+    }
+
+    private void invalidateDownstream(Graph graph, ExecutionContext context, Node<?> node) {
+        for (NodePin pin : node.getPins()) {
+            if (pin.getKind() == PinKind.OUTPUT) {
+                for (NodePin connected : graph.getConnectedInputs(pin)) {
+                    Node<?> downstream = graph.getNode(connected.getNodeId());
+                    context.invalidateCachedVar(downstream.getId());
+                    if (downstream instanceof ValueNode) {
+                        invalidateDownstream(graph, context, downstream);
+                    }
+                }
+            }
+        }
     }
 
     public ExecutionNode<?> findEntryNode(Graph graph) {
@@ -87,7 +133,7 @@ public class GraphSimulator {
         }
     }
 
-    private ExecutionNode<?> findNextExecutionNode(Graph graph, ExecutionNode<?> current) {
+    private ExecutionNode<?> findNextExecutionNode(Graph graph, ExecutionNode<?> current, StructureInstance instance) {
         String targetPinName = current.getNextExecutionPin(current.getLastContext());
 
         Optional<NodePin> execOutPin;
@@ -117,6 +163,18 @@ public class GraphSimulator {
                 "Execution link leads to a non-ExecutionNode: " + nextNode.getId());
     }
 
+    private ExecutionNode<?> extractEndNode(StructureInstance instance) {
+        deferredExecutionCount++;
+        if (deferredExecutionCount > MAX_DEFERRED_EXECUTIONS || executeLast.isEmpty()) {
+            return null;
+        }
+        return executeLast.remove(0);
+    }
+
+    public void scheduleAfter(ExecutionNode<?> node) {
+        executeLast.add(node);
+    }
+
     private boolean hasIncomingExecutionLink(Graph graph, Node<?> node) {
         for (NodePin pin : node.getPins()) {
             if (pin.getKind() == PinKind.INPUT && pin.getCategory() == PinCategory.EXECUTION) {
@@ -143,6 +201,7 @@ public class GraphSimulator {
                 .orElse(null);
     }
 
+    //I might be the best coder ever
     public static <V> V resolveInputByPin(Graph graph, ExecutionContext context,
                                           NodePin inputPin, Class<V> type) {
         Optional<NodePin> upstreamPin = graph.getConnectedOutput(inputPin);
@@ -151,12 +210,19 @@ public class GraphSimulator {
         List<GenVar<?>> vars = context.getLocalVars(upstreamPin.get().getNodeId());
         if (vars == null) return null;
 
-        return vars.stream()
-                .filter(var -> upstreamPin.get().getDataType() != null
-                        && upstreamPin.get().getDataType().isInstance(var.getValue()))
+        String pinName = upstreamPin.get().getDisplayName();
+
+        Optional<V> named = vars.stream()
+                .filter(var -> var.getName().equals(pinName))
+                .filter(var -> type.isInstance(var.getValue()))
+                .map(var -> type.cast(var.getValue()))
+                .findFirst();
+
+        return named.orElseGet(() -> vars.stream()
+                .filter(var -> type.isInstance(var.getValue()))
                 .map(var -> type.cast(var.getValue()))
                 .findFirst()
-                .orElse(null);
+                .orElse(null));
     }
 
     public static class GraphSimulationException extends RuntimeException {

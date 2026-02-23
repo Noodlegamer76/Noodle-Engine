@@ -2,14 +2,14 @@ package com.noodlegamer76.engine.megastructure.structure.variables;
 
 public class GenVar<T> {
     private T value;
-    private final GenVarSerializer<T> serializer;
-    private final String name;
+    private final Class<T> clazz;
+    private String name;
     private final boolean global;
 
-    public GenVar(T value, GenVarSerializer<T> serializer, boolean global, String name) {
+    public GenVar(T value, Class<T> clazz, boolean global, String name) {
         if (value == null) throw new NullPointerException("GenVar default value can't be null");
         this.value = value;
-        this.serializer = serializer;
+        this.clazz = clazz;
         this.name = name;
         this.global = global;
     }
@@ -20,7 +20,9 @@ public class GenVar<T> {
 
     public T getValue() { return value; }
 
-    public GenVarSerializer<T> getSerializer() { return serializer; }
+    public Class<T> getClazz() {
+        return clazz;
+    }
 
     public String getName() {
         return name;
@@ -28,5 +30,9 @@ public class GenVar<T> {
 
     public boolean isGlobal() {
         return global;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

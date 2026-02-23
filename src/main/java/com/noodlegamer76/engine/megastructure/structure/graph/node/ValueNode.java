@@ -16,13 +16,8 @@ public abstract class ValueNode<T extends Node<T>> extends Node<T> {
         super(id, graph, registry, name, category);
     }
 
-    protected <V> V resolve(ExecutionContext context, String pinName, Class<V> type) {
-        return GraphSimulator.resolveInputByPin(getGraph(), context, getPin(pinName), type);
-    }
-
-    protected <V> V resolve(ExecutionContext context, String pinName, Class<V> type, V defaultValue) {
-        V value = resolve(context, pinName, type);
-        return value != null ? value : defaultValue;
+    public boolean isCacheable() {
+        return true;
     }
 
     public abstract List<GenVar<?>> evaluate(StructureExecuter executer, ExecutionContext context, StructureInstance instance);
