@@ -17,7 +17,7 @@ import net.minecraft.core.BlockPos;
 import java.util.List;
 
 public class BlockPosAddNodePos extends ValueNode<BlockPosAddNodePos> {
-    GenVar<BlockPos> output = new GenVar<>(BlockPos.ZERO, BlockPos.class, false, "Node Pos");
+    GenVar<BlockPos> output = new GenVar<>(BlockPos.ZERO, GenVarSerializers.BLOCK_POS, false, false, "Node Pos");
 
     public BlockPosAddNodePos(int id, Graph graph) {
         super(id, graph, InitNodes.BLOCK_POS_ADD_NODE_POS, "Block Pos: Add node position", "Data/Position");

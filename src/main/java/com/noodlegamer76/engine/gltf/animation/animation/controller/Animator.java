@@ -127,10 +127,7 @@ public class Animator {
         Matrix4f global = new Matrix4f(parentGlobal).mul(local);
         animatedGlobals.put(node, global);
 
-        for (NodeModel childModel : node.getNodeModel().getChildren()) {
-            Node child = node.getGltf()
-                    .getNodeModelToNode()
-                    .get(childModel);
+        for (Node child : node.getChildren()) {
             computeRecursive(child, global);
         }
     }

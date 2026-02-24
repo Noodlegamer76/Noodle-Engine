@@ -1,6 +1,7 @@
 package com.noodlegamer76.engine.megastructure.structure.graph.node.nodes.data;
 
 import com.google.gson.JsonObject;
+import com.noodlegamer76.engine.core.network.GameObjectSerializers;
 import com.noodlegamer76.engine.megastructure.structure.StructureExecuter;
 import com.noodlegamer76.engine.megastructure.structure.StructureInstance;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
@@ -11,6 +12,7 @@ import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinCategory;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
+import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializers;
 import imgui.ImGui;
 import imgui.type.ImString;
 
@@ -25,7 +27,7 @@ public class SetLocalVariable extends ExecutionNode<SetLocalVariable> {
     public void execute(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
         Object value = resolve(context, "Value", Object.class);
         if (value != null && !variableName.get().isBlank()) {
-            context.setLocalVar(variableName.get(), new GenVar<>(value, Object.class, false, variableName.get()));
+            context.setLocalVar(variableName.get(), new GenVar<>(value, GenVarSerializers.ANY_OBJECT, false, false, variableName.get()));
         }
     }
 

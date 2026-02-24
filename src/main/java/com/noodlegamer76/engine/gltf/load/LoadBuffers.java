@@ -1,6 +1,7 @@
 package com.noodlegamer76.engine.gltf.load;
 
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.McGltfLoader;
 import com.noodlegamer76.engine.gltf.geometry.GltfAccessorUtils;
 import de.javagl.jgltf.model.AccessorModel;
 import de.javagl.jgltf.model.BufferViewModel;
@@ -12,7 +13,7 @@ import java.nio.IntBuffer;
 
 public class LoadBuffers {
 
-    public static void loadBuffers(McGltf gltf) {
+    public static void loadBuffers(McGltfLoader gltf) {
         for (AccessorModel accessor : gltf.getModel().getAccessorModels()) {
             BufferViewModel bufferView = accessor.getBufferViewModel();
             if (bufferView == null) continue;

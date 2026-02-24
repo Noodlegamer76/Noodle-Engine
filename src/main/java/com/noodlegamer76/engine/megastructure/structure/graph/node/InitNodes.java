@@ -32,9 +32,6 @@ public class InitNodes {
     public static final RegistryObject<NodeType<DirectionConstant>> DIRECTION_CONSTANT =
             NODE_TYPES.register("direction_constant", () -> new NodeType<>(DirectionConstant::new));
 
-    public static final RegistryObject<NodeType<Vec3Node>> VEC3_NODE =
-            NODE_TYPES.register("vec3_node", () -> new NodeType<>(Vec3Node::new));
-
     public static final RegistryObject<NodeType<PlaceStructureNode>> PLACE_STRUCTURE =
             NODE_TYPES.register("place_structure", () -> new NodeType<>(PlaceStructureNode::new));
 

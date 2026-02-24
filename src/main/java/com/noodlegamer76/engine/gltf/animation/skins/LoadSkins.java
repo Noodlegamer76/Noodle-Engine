@@ -2,6 +2,7 @@ package com.noodlegamer76.engine.gltf.animation.skins;
 
 import com.noodlegamer76.engine.client.renderer.gltf.RenderableMesh;
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.McGltfLoader;
 import com.noodlegamer76.engine.gltf.animation.animation.controller.Animator;
 import com.noodlegamer76.engine.gltf.geometry.MeshData;
 import com.noodlegamer76.engine.gltf.node.Node;
@@ -17,28 +18,32 @@ import java.nio.FloatBuffer;
 import java.util.*;
 
 public class LoadSkins {
-    public static void loadSkins(McGltf gltf) {
-        Map<SkinModel, Map<Node, Matrix4f>> allInvBindMaps = new HashMap<>();
+    public static void loadSkins(McGltfLoader gltf) {
+        Map<McSkin, Map<Node, Matrix4f>> allInvBindMaps = new HashMap<>();
 
         for (SkinModel skin : gltf.getModel().getSkinModels()) {
+            McSkin mcSkin = new McSkin();
+            gltf.addSkin(skin, mcSkin);
+
             Map<Node, Matrix4f> invBindMatrices = loadInverseBindMatrices(gltf, skin);
 
-            allInvBindMaps.put(skin, invBindMatrices);
+            allInvBindMaps.put(mcSkin, invBindMatrices);
         }
 
-        gltf.getInverseBindMatrices().putAll(allInvBindMaps);
+        gltf.getResult().getInverseBindMatrices().putAll(allInvBindMaps);
 
         for (NodeModel nodeModel: gltf.getModel().getNodeModels()) {
             SkinModel skin = nodeModel.getSkinModel();
             if (skin == null) continue;
             for (MeshModel meshModel: nodeModel.getMeshModels()) {
                 MeshData meshData = gltf.getMeshModelToMeshData().get(meshModel);
-                meshData.setSkin(skin);
+                McSkin mcSkin = gltf.getSkinModelToSkin().get(skin);
+                meshData.setSkin(mcSkin);
             }
         }
     }
 
-    public static Map<Node, Matrix4f> loadInverseBindMatrices(McGltf gltf, SkinModel skin) {
+    public static Map<Node, Matrix4f> loadInverseBindMatrices(McGltfLoader gltf, SkinModel skin) {
         Map<Node, Matrix4f> invBindMap = new HashMap<>();
 
         AccessorModel invBindMatricesAcc = skin.getInverseBindMatrices();
@@ -77,16 +82,14 @@ public class LoadSkins {
     }
 
     public static void getSkinGlobal(RenderableMesh mesh) {
-        SkinModel skin = mesh.getMeshData().getSkin();
+        McSkin skin = mesh.getMeshData().getSkin();
         if (skin == null) return;
 
         List<Matrix4f> finalJointMatrices = new ArrayList<>();
-        List<NodeModel> jointModels = skin.getJoints();
+        List<Node> jointModels = skin.getJoints();
 
         for (int i = 0; i < jointModels.size(); i++) {
-            Node jointNode = mesh.getGltf()
-                    .getNodeModelToNode()
-                    .get(jointModels.get(i));
+            Node jointNode = skin.getJoints().get(i);
 
             Matrix4f invBind = mesh.getGltf()
                     .getInverseBindMatrices()
@@ -94,7 +97,7 @@ public class LoadSkins {
                     .get(jointNode);
 
             if (invBind == null) {
-                throw new IllegalStateException("Missing inverse bind for joint: " + jointNode.getNodeModel().getName());
+                throw new IllegalStateException("Missing inverse bind for joint");
             }
 
             Matrix4f jointGlobal;

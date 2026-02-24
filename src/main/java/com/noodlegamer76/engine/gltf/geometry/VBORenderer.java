@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.noodlegamer76.engine.client.ModVertexFormats;
 import com.noodlegamer76.engine.client.renderer.gltf.RenderableBuffer;
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.McGltfLoader;
 import com.noodlegamer76.engine.gltf.material.MaterialProperty;
 import com.noodlegamer76.engine.gltf.material.McMaterial;
 import com.noodlegamer76.engine.mixin.BufferBuilderMixin;
@@ -17,7 +18,7 @@ import java.util.*;
 
 public class VBORenderer {
 
-    public static GltfVbo render(McGltf gltf, McMaterial material, List<MeshPrimitiveModel> primitives) {
+    public static GltfVbo render(McGltfLoader gltf, McMaterial material, List<MeshPrimitiveModel> primitives) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.TRIANGLES, ModVertexFormats.GLB_PBR);
@@ -35,7 +36,7 @@ public class VBORenderer {
         return vbo;
     }
 
-    private static void renderPrimitive(McGltf gltf, BufferBuilder bb, List<MeshPrimitiveModel> primitives, McMaterial material, GltfVbo vbo) {
+    private static void renderPrimitive(McGltfLoader gltf, BufferBuilder bb, List<MeshPrimitiveModel> primitives, McMaterial material, GltfVbo vbo) {
         Map<MeshPrimitiveModel, int[]> primitiveJointsMap = new HashMap<>();
         Map<MeshPrimitiveModel, float[]> primitiveWeightsMap = new HashMap<>();
 

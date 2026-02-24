@@ -56,8 +56,8 @@ public class StructureInstance {
     private ExecutionContext createExecutionContext(FeaturePlaceContext<NoneFeatureConfiguration> ctx, Node node) {
         ExecutionContext nodeContext = new ExecutionContext();
         RandomSource random = StructMath.getNodeRandom(node, ctx, definition.getId().hashCode());
-        nodeContext.addGlobalVar(new GenVar<>(random.nextLong(), Long.class, true, "Structure Seed"));
-        nodeContext.addGlobalVar(new GenVar<>(new BlockPos(node.getX(), 0, node.getZ()), BlockPos.class, true, "Node Origin"));
+        nodeContext.addGlobalVar(new GenVar<>(random.nextLong(), GenVarSerializers.LONG, true, false, "Structure Seed"));
+        nodeContext.addGlobalVar(new GenVar<>(new BlockPos(node.getX(), 0, node.getZ()), GenVarSerializers.BLOCK_POS, true, false, "Node Origin"));
         return nodeContext;
     }
 
@@ -66,7 +66,7 @@ public class StructureInstance {
 
         long seed = context.getGlobalVar("Structure Seed", Long.class).getValue();
         RandomSource random = RandomSource.create(seed);
-        context.addGlobalVar(new GenVar<>(random.nextLong(), Long.class, true, "Structure Seed"));
+        context.addGlobalVar(new GenVar<>(random.nextLong(), GenVarSerializers.LONG, true, false, "Structure Seed"));
         randoms.put(context, random);
         return random;
     }

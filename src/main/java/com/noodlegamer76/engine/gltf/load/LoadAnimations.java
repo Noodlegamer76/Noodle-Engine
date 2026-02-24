@@ -1,6 +1,7 @@
 package com.noodlegamer76.engine.gltf.load;
 
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.McGltfLoader;
 import com.noodlegamer76.engine.gltf.animation.animation.AnimationClip;
 import com.noodlegamer76.engine.gltf.animation.animation.AnimationTrack;
 import de.javagl.jgltf.model.AccessorModel;
@@ -17,7 +18,7 @@ import java.util.List;
  */
 public class LoadAnimations {
 
-    public static void loadAnimations(McGltf gltf) {
+    public static void loadAnimations(McGltfLoader gltf) {
         List<AnimationModel> gltfAnimations = gltf.getModel().getAnimationModels();
 
         for (AnimationModel gltfAnimation : gltfAnimations) {
@@ -53,7 +54,6 @@ public class LoadAnimations {
                     continue;
                 }
 
-                // Node is retrieved via gltf.getNodeModelToNode() lookup
                 AnimationTrack track = new AnimationTrack(
                         gltf.getNodeModelToNode().get(channel.getNodeModel()),
                         path,
@@ -65,12 +65,11 @@ public class LoadAnimations {
                 animation.addTrack(track);
             }
 
-            gltf.getAnimations().put(animation.getName(), animation);
+            gltf.getResult().getAnimations().put(animation.getName(), animation);
         }
     }
 
-    private static float[] getFloatArray(McGltf gltf, AccessorModel accessor) {
-        // --- FIX 2: Use duplicate() to safely read a shared buffer ---
+    private static float[] getFloatArray(McGltfLoader gltf, AccessorModel accessor) {
         FloatBuffer originalBuffer = (FloatBuffer) gltf.getAccessorBuffers().get(accessor);
         FloatBuffer floatBuffer = originalBuffer.duplicate();
 
@@ -79,7 +78,7 @@ public class LoadAnimations {
         return array;
     }
 
-    private static List<Quaternionf> loadRotationKeyframes(McGltf gltf, AccessorModel accessor) {
+    private static List<Quaternionf> loadRotationKeyframes(McGltfLoader gltf, AccessorModel accessor) {
         FloatBuffer originalBuffer = (FloatBuffer) gltf.getAccessorBuffers().get(accessor);
         FloatBuffer floatBuffer = originalBuffer.duplicate();
 
@@ -96,7 +95,7 @@ public class LoadAnimations {
         return rotations;
     }
 
-    private static List<Vector3f> loadVectorKeyframes(McGltf gltf, AccessorModel accessor) {
+    private static List<Vector3f> loadVectorKeyframes(McGltfLoader gltf, AccessorModel accessor) {
         FloatBuffer originalBuffer = (FloatBuffer) gltf.getAccessorBuffers().get(accessor);
         FloatBuffer floatBuffer = originalBuffer.duplicate();
 

@@ -17,7 +17,7 @@ import net.minecraft.core.BlockPos;
 import java.util.List;
 
 public class BlockPosSubtractNodePos extends ValueNode<BlockPosSubtractNodePos> {
-    GenVar<BlockPos> output = new GenVar<>(BlockPos.ZERO, BlockPos.class, false, "Output");
+    GenVar<BlockPos> output = new GenVar<>(BlockPos.ZERO, GenVarSerializers.BLOCK_POS, false, false, "Output");
 
     public BlockPosSubtractNodePos(int id, Graph graph) {
         super(id, graph, InitNodes.BLOCK_POS_SUBTRACT_NODE_POS, "Block Pos: Subtract node position", "Data/Position");

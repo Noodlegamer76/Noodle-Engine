@@ -20,60 +20,29 @@ import net.minecraft.core.Direction;
 
 import java.util.List;
 
-public class DirectionConstant extends ValueNode<DirectionConstant> {
-    private final GenVar<Direction> constant;
-    private Direction direction = Direction.UP;
-    private final ImString name = new ImString(256);
-
+public class DirectionConstant extends ConstantNode<Direction, DirectionConstant> {
     public DirectionConstant(int id, Graph graph) {
-        super(id, graph, InitNodes.DIRECTION_CONSTANT, "Direction Const", "Data/Constants");
-        constant = new GenVar<>(Direction.UP, Direction.class, false, "Value");
+        super(
+                id,
+                graph,
+                new GenVar<>(Direction.UP, GenVarSerializers.DIRECTION, false, true, "Value"),
+                InitNodes.DIRECTION_CONSTANT,
+                "Direction Const",
+                "Data/Constants"
+        );
     }
 
     @Override
     protected void renderContents() {
+        super.renderContents();
         ImGui.setNextItemWidth(280f);
-        ImGui.inputText("Name##" + getId(), name);
-        ImGui.setNextItemWidth(280f);
-        if (ImGui.beginCombo("Value##" + getId(), direction.getSerializedName())) {
+        if (ImGui.beginCombo("Value##" + getId(), getValue().getSerializedName())) {
             for (Direction direction : Direction.values()) {
                 if (ImGui.selectable(direction.getSerializedName())) {
-                    this.direction = direction;
+                    setValue(direction);
                 }
             }
             ImGui.endCombo();
         }
-    }
-
-    @Override
-    public void initPins() {
-        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.OUTPUT, PinCategory.DATA, Direction.class, "Value"));
-    }
-
-    @Override
-    public List<GenVar<?>> evaluate(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
-        constant.setValue(direction);
-        return List.of(constant);
-    }
-
-    @Override
-    public JsonObject saveData() {
-        JsonObject data = super.saveData();
-        data.addProperty("name", name.get());
-        data.addProperty("value", direction.ordinal());
-        return data;
-    }
-
-    @Override
-    public void loadData(JsonObject data) {
-        name.set(data.get("name").getAsString());
-        direction = Direction.values()[data.get("value").getAsInt()];
-    }
-
-    @Override
-    public List<InspectorVariable> getInspectorVariables() {
-        return List.of(
-                new InspectorVariable(name, constant, this::renderContents)
-        );
     }
 }

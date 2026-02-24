@@ -1,5 +1,6 @@
 package com.noodlegamer76.engine.megastructure.structure.graph.node;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.noodlegamer76.engine.megastructure.structure.graph.Graph;
 import com.noodlegamer76.engine.megastructure.structure.graph.GraphSimulator;
@@ -7,6 +8,7 @@ import com.noodlegamer76.engine.megastructure.structure.graph.InspectorVariable;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
+import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializer;
 import imgui.extension.imnodes.ImNodes;
 import imgui.ImGui;
 import net.minecraftforge.registries.DeferredRegister;
@@ -23,6 +25,7 @@ public abstract class Node<T extends Node<T>> {
     private final Map<String, NodePin> pinsByDisplayName = new HashMap<>();
     public float x, y;
     private final RegistryObject<NodeType<T>> registry;
+    protected final List<GenVar<?>> exposedVars = new ArrayList<>();
 
     private final String displayName;
     private final String categoryPath;
@@ -97,10 +100,38 @@ public abstract class Node<T extends Node<T>> {
     }
 
     public JsonObject saveData() {
-        return new JsonObject();
+        JsonObject data = new JsonObject();
+        for (GenVar<?> var : exposedVars) {
+            if (var.isPersistent()) {
+                data.add(var.getName(), serializeGenVar(var));
+            }
+        }
+        saveAdditionalData(data);
+        return data;
+    }
+
+    private <V> JsonElement serializeGenVar(GenVar<V> var) {
+        return var.getSerializer().serialize(var.getValue());
+    }
+
+    private <V> void deserializeGenVar(GenVar<V> var, JsonElement element) {
+        var.setValue(var.getSerializer().deserialize(element));
+    }
+
+    public void saveAdditionalData(JsonObject data) {
     }
 
     public void loadData(JsonObject data) {
+        for (GenVar<?> var: exposedVars) {
+            if (var.isPersistent()) {
+                deserializeGenVar(var, data.get(var.getName()));
+            }
+        }
+        loadAdditionalData(data);
+    }
+
+    public void loadAdditionalData(JsonObject data) {
+
     }
 
     public NodePin getPin(String displayName) {
@@ -119,6 +150,11 @@ public abstract class Node<T extends Node<T>> {
     public List<InspectorVariable> getInspectorVariables() {
         return List.of();
     }
+
+    protected void registerVar(GenVar<?> var) {
+        exposedVars.add(var);
+    }
+
 
     protected abstract void renderContents();
 

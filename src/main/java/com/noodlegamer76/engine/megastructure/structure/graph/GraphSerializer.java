@@ -10,6 +10,7 @@ import com.noodlegamer76.engine.megastructure.structure.graph.node.NodeType;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinCategory;
+import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.RegistryObject;
 

@@ -7,22 +7,31 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Node {
     private Node parent;
+    private final List<Node> children = new ArrayList<>();
     private Matrix4f global;
     private Matrix4f local;
-    private final NodeModel nodeModel;
     private final McGltf gltf;
 
-    public Node(Matrix4f local, NodeModel nodeModel, McGltf gltf) {
+    public Node(Matrix4f local, McGltf gltf) {
         this.local = local;
-        this.nodeModel = nodeModel;
         this.gltf = gltf;
     }
 
     public void setParent(Node parent) {
         this.parent = parent;
+    }
+
+    public List<Node> getChildren() {
+        return children;
+    }
+
+    public void addChild(Node child) {
+        children.add(child);
     }
 
     public void setGlobal(Matrix4f global) {
@@ -48,10 +57,6 @@ public class Node {
 
     public Matrix4f getGlobal() {
         return global;
-    }
-
-    public NodeModel getNodeModel() {
-        return nodeModel;
     }
 
     public Matrix4f getLocal() {

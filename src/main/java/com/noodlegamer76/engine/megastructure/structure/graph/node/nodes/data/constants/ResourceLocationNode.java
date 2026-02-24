@@ -16,61 +16,51 @@ import imgui.type.ImString;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
+import java.util.function.IntPredicate;
 
-public class ResourceLocationNode extends ValueNode<ResourceLocationNode> {
-    private final GenVar<ResourceLocation> locationGenVar;
+public class ResourceLocationNode extends ConstantNode<ResourceLocation, ResourceLocationNode> {
     private final ImString namespace = new ImString(256);
     private final ImString path = new ImString(256);
-    private final ImString name = new ImString(256);
 
     public ResourceLocationNode(int id, Graph graph) {
-        super(id, graph, InitNodes.RESOURCE_LOCATION, "Resource Location Const", "Data/Constants");
-        locationGenVar = new GenVar<>(ResourceLocation.withDefaultNamespace("dummy"), ResourceLocation.class, false, "Resource Location");
-    }
-
-    @Override
-    public List<GenVar<?>> evaluate(StructureExecuter executer, ExecutionContext context, StructureInstance instance) {
-        locationGenVar.setValue(ResourceLocation.fromNamespaceAndPath(namespace.get(), path.get()));
-        return List.of(
-                locationGenVar
+        super(
+                id,
+                graph,
+                new GenVar<>(ResourceLocation.withDefaultNamespace(""), GenVarSerializers.RESOURCE_LOCATION, false, true, "Resource Location"),
+                InitNodes.RESOURCE_LOCATION,
+                "Resource Location Const",
+                "Data/Constants"
         );
     }
 
     @Override
     protected void renderContents() {
+        super.renderContents();
+
+        namespace.set(getValue().getNamespace());
+        path.set(getValue().getPath());
+
         ImGui.setNextItemWidth(280f);
-        ImGui.inputText("Name##" + getId(), name);
+        if (ImGui.inputText("Namespace##" + getId(), namespace)) {
+            namespace.set(sanitize(namespace.get(), c -> (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '-'));
+            setValue(ResourceLocation.fromNamespaceAndPath(namespace.get(), path.get()));
+        }
+
         ImGui.setNextItemWidth(280f);
-        ImGui.inputText("Namespace##" + getId(), namespace);
-        ImGui.setNextItemWidth(280f);
-        ImGui.inputText("Path##" + getId(), path);
+        if (ImGui.inputText("Path##" + getId(), path)) {
+            path.set(sanitize(path.get(), i -> validPathChar((char) i)));
+            setValue(ResourceLocation.fromNamespaceAndPath(namespace.get(), path.get()));
+        }
     }
 
-    @Override
-    public void initPins() {
-        addPin(new NodePin(getGraph().nextId(), getId(), PinKind.OUTPUT, PinCategory.DATA, ResourceLocation.class, "Resource Location"));
+    private static String sanitize(String input, IntPredicate validChar) {
+        return input.chars()
+                .filter(validChar)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 
-    @Override
-    public JsonObject saveData() {
-        JsonObject data = new JsonObject();
-        data.addProperty("name", name.get());
-        data.addProperty("namespace", namespace.get());
-        data.addProperty("path", path.get());
-        return data;
-    }
-
-    @Override
-    public void loadData(JsonObject data) {
-        name.set(data.get("name").getAsString());
-        if (data.has("namespace")) namespace.set(data.get("namespace").getAsString());
-        if (data.has("path")) path.set(data.get("path").getAsString());
-    }
-
-    @Override
-    public List<InspectorVariable> getInspectorVariables() {
-        return List.of(
-                new InspectorVariable(name, locationGenVar, this::renderContents)
-        );
+    public static boolean validPathChar(char pathChar) {
+        return pathChar == '_' || pathChar == '-' || pathChar >= 'a' && pathChar <= 'z' || pathChar >= '0' && pathChar <= '9' || pathChar == '/' || pathChar == '.';
     }
 }

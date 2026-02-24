@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class IntegerEquals extends ValueNode<IntegerEquals> {
-    GenVar<Boolean> output = new GenVar<>(false, Boolean.class, false, "Output");
+    GenVar<Boolean> output = new GenVar<>(false, GenVarSerializers.BOOLEAN, false, false, "Output");
 
     public IntegerEquals(int id, Graph graph) {
         super(id, graph, InitNodes.INTEGER_EQUALS, "Integer: Equals", "Data/Logic");

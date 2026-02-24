@@ -17,7 +17,7 @@ import net.minecraft.core.BlockPos;
 import java.util.List;
 
 public class IntegerSubtract extends ValueNode<IntegerSubtract> {
-    GenVar<Integer> output = new GenVar<>(0, Integer.class, false, "Output");
+    GenVar<Integer> output = new GenVar<>(0, GenVarSerializers.INT, false, false, "Output");
 
     public IntegerSubtract(int id, Graph graph) {
         super(id, graph, InitNodes.INTEGER_SUBTRACT, "Integer: Subtract", "Data/Math");

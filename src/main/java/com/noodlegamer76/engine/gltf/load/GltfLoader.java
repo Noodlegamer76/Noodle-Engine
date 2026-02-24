@@ -2,6 +2,7 @@ package com.noodlegamer76.engine.gltf.load;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.McGltfLoader;
 import de.javagl.jgltf.model.impl.DefaultGltfModel;
 import de.javagl.jgltf.model.io.GltfModelReader;
 import net.minecraft.resources.ResourceLocation;
@@ -29,11 +30,11 @@ public class GltfLoader {
 
             DefaultGltfModel gltfModel = (DefaultGltfModel) READER.readWithoutReferences(resourceStream);
 
-            McGltf model = new McGltf(gltfModel, resource.getKey());
+            McGltfLoader model = new McGltfLoader(gltfModel, resource.getKey());
 
             RenderSystem.recordRenderCall(model::setup);
 
-            ModelStorage.addModel(resource.getKey(), model);
+            ModelStorage.addModel(resource.getKey(), model.getResult());
 
         } catch (Exception e) {
             e.printStackTrace();

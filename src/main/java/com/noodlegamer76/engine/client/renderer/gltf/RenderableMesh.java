@@ -4,6 +4,7 @@ import com.noodlegamer76.engine.gltf.McGltf;
 import com.noodlegamer76.engine.gltf.animation.animation.controller.Animator;
 import com.noodlegamer76.engine.gltf.animation.skins.LoadSkins;
 import com.noodlegamer76.engine.gltf.geometry.MeshData;
+import com.noodlegamer76.engine.gltf.node.Node;
 import de.javagl.jgltf.model.NodeModel;
 import org.joml.Matrix4f;
 
@@ -15,7 +16,7 @@ public class RenderableMesh {
     private final MeshData meshData;
     private final McGltf gltf;
     private List<Matrix4f> jointMatrices;
-    private List<NodeModel> joints = new ArrayList<>();
+    private List<Node> joints = new ArrayList<>();
     private Matrix4f modelMatrix;
     private Animator animator;
 
@@ -60,7 +61,7 @@ public class RenderableMesh {
         return jointMatrices;
     }
 
-    public List<NodeModel> getJoints() {
+    public List<Node> getJoints() {
         return joints;
     }
 

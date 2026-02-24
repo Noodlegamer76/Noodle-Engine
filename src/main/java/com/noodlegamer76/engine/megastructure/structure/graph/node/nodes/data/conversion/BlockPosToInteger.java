@@ -17,9 +17,9 @@ import net.minecraft.core.BlockPos;
 import java.util.List;
 
 public class BlockPosToInteger extends ValueNode<BlockPosToInteger> {
-    GenVar<Integer> xOut = new GenVar<>(0, Integer.class, false, "X");
-    GenVar<Integer> yOut = new GenVar<>(0, Integer.class, false, "Y");
-    GenVar<Integer> zOut = new GenVar<>(0, Integer.class, false, "Z");
+    GenVar<Integer> xOut = new GenVar<>(0, GenVarSerializers.INT, false, false, "X");
+    GenVar<Integer> yOut = new GenVar<>(0, GenVarSerializers.INT, false, false, "Y");
+    GenVar<Integer> zOut = new GenVar<>(0, GenVarSerializers.INT, false, false, "Z");
 
     public BlockPosToInteger(int id, Graph graph) {
         super(id, graph, InitNodes.BLOCK_POS_TO_INT, "Block Pos to Integer", "Data/Conversion");

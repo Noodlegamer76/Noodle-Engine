@@ -2,6 +2,7 @@ package com.noodlegamer76.engine.gltf.load;
 
 import com.noodlegamer76.engine.event.ShaderRegistry;
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.McGltfLoader;
 import com.noodlegamer76.engine.gltf.material.MaterialBuilder;
 import com.noodlegamer76.engine.gltf.material.MaterialProperty;
 import com.noodlegamer76.engine.gltf.material.McMaterial;
@@ -11,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector4f;
 
 public class LoadMaterials {
-    public static void loadMaterials(McGltf gltf) {
+    public static void loadMaterials(McGltfLoader gltf) {
         MaterialData materialData = gltf.getMaterialData();
 
         for (int i = 0; i < gltf.getModel().getMaterialModels().size(); i++) {

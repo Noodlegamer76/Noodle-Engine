@@ -1,6 +1,7 @@
 package com.noodlegamer76.engine.gltf.load;
 
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.McGltfLoader;
 import com.noodlegamer76.engine.gltf.geometry.MeshData;
 import com.noodlegamer76.engine.gltf.node.Node;
 import de.javagl.jgltf.model.MeshModel;
@@ -13,21 +14,20 @@ import java.util.List;
 import java.util.Set;
 
 public class LoadNodes {
-    public static void loadNodes(McGltf gltf) {
+    public static void loadNodes(McGltfLoader gltf) {
         for (NodeModel nodeModel : gltf.getModel().getNodeModels()) {
 
             float[] localArr = new float[16];
             nodeModel.computeLocalTransform(localArr);
             Matrix4f localMatrix = new Matrix4f().set(localArr);
 
-            Node node = new Node(localMatrix, nodeModel, gltf);
+            Node node = new Node(localMatrix, gltf.getResult());
             gltf.addNodeModelToNode(nodeModel, node);
 
             List<MeshModel> meshModels = nodeModel.getMeshModels();
             for (MeshModel meshModel : meshModels) {
                 MeshData data = gltf.getMeshModelToMeshData().get(meshModel);
                 if (data != null) {
-                    gltf.addMeshToNode(data, node);
                     data.setNode(node);
                 }
             }
@@ -40,6 +40,15 @@ public class LoadNodes {
             if (parentModel != null) {
                 Node parentNode = gltf.getNodeModelToNode().get(parentModel);
                 childNode.setParent(parentNode);
+            }
+        }
+
+        for (NodeModel nodeModel : gltf.getModel().getNodeModels()) {
+            Node node = gltf.getNodeModelToNode().get(nodeModel);
+            List<NodeModel> children = nodeModel.getChildren();
+            for (NodeModel child : children) {
+                Node childNode = gltf.getNodeModelToNode().get(child);
+                node.addChild(childNode);
             }
         }
 
@@ -59,7 +68,7 @@ public class LoadNodes {
             }
         }
 
-        gltf.getRootNodes().addAll(rootNodes);
+        gltf.getResult().getRootNodes().addAll(rootNodes);
     }
 
 }

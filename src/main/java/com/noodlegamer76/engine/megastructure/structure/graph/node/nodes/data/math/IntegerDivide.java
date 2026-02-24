@@ -16,7 +16,7 @@ import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializ
 import java.util.List;
 
 public class IntegerDivide extends ValueNode<IntegerDivide> {
-    GenVar<Integer> output = new GenVar<>(0, Integer.class, false, "Output");
+    GenVar<Integer> output = new GenVar<>(0, GenVarSerializers.INT, false, false, "Output");
 
     public IntegerDivide(int id, Graph graph) {
         super(id, graph, InitNodes.INTEGER_DIVIDE, "Integer: Divide", "Data/Math");

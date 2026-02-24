@@ -11,6 +11,7 @@ import com.noodlegamer76.engine.megastructure.structure.graph.pin.NodePin;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinCategory;
 import com.noodlegamer76.engine.megastructure.structure.graph.pin.PinKind;
 import com.noodlegamer76.engine.megastructure.structure.variables.GenVar;
+import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializers;
 import imgui.ImGui;
 import imgui.type.ImString;
 
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class GetLocalVariable extends  ValueNode<GetLocalVariable> {
     private final ImString variableName = new ImString(256);
-    private final GenVar<Object> result = new GenVar<>(Object.class, Object.class, false, "Value");
+    private final GenVar<Object> result = new GenVar<>(Object.class, GenVarSerializers.ANY_OBJECT, false, false, "Value");
 
     public GetLocalVariable(int id, Graph graph) {
         super(id, graph, InitNodes.GET_LOCAL_VAR, "Get Local Variable", "Data");

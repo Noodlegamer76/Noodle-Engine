@@ -39,7 +39,7 @@ public class ExecutionContext {
         GenVar<?> raw = globalVariables.get(name);
         if (raw == null) return null;
 
-        if (raw.getClazz() != clazz) {
+        if (raw.getSerializer().getHandledClass() != clazz) {
             NoodleEngine.LOGGER.error("Serializer mismatch for GenVar: " + name);
             return null;
         }

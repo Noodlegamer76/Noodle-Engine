@@ -1,6 +1,7 @@
 package com.noodlegamer76.engine.gltf.load;
 
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.McGltfLoader;
 import com.noodlegamer76.engine.gltf.geometry.GltfVbo;
 import com.noodlegamer76.engine.gltf.geometry.MeshData;
 import com.noodlegamer76.engine.gltf.geometry.VBORenderer;
@@ -13,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 public class LoadMeshes {
-    public static void loadMeshes(McGltf gltf) {
+    public static void loadMeshes(McGltfLoader gltf) {
         for (MeshModel mesh : gltf.getModel().getMeshModels()) {
-            MeshData meshData = new MeshData(mesh, gltf);
+            MeshData meshData = new MeshData(gltf.getResult());
 
             for (MeshPrimitiveModel primitive: mesh.getMeshPrimitiveModels()) {
                 MaterialModel material = primitive.getMaterialModel();
@@ -23,18 +24,17 @@ public class LoadMeshes {
                 meshData.addPrimitive(mcMat, primitive);
             }
 
-            gltf.addMesh(meshData);
+            gltf.addMesh(meshData, mesh);
         }
 
         loadPrimitives(gltf);
     }
 
-    public static void loadPrimitives(McGltf gltf) {
-        for (MeshData mesh : gltf.getMeshes()) {
+    public static void loadPrimitives(McGltfLoader gltf) {
+        for (MeshData mesh : gltf.getResult().getMeshes()) {
             Map<McMaterial, List<MeshPrimitiveModel>> primitives = mesh.getPrimitives();
             for (McMaterial material: primitives.keySet()) {
                 GltfVbo buffer = VBORenderer.render(gltf, material, primitives.get(material));
-                if (buffer == null) continue;
 
                 mesh.addPrimitiveBuffer(material, buffer);
             };

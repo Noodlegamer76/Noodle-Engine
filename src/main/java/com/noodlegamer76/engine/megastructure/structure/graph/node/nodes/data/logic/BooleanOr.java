@@ -16,7 +16,7 @@ import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializ
 import java.util.List;
 
 public class BooleanOr extends ValueNode<BooleanOr> {
-    GenVar<Boolean> output = new GenVar<>(false, Boolean.class, false, "Output");
+    GenVar<Boolean> output = new GenVar<>(false, GenVarSerializers.BOOLEAN, false, false, "Output");
 
     public BooleanOr(int id, Graph graph) {
         super(id, graph, InitNodes.BOOLEAN_OR, "Boolean: OR", "Data/Logic");

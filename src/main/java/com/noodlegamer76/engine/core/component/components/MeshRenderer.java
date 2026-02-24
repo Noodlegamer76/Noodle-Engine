@@ -68,7 +68,7 @@ public class MeshRenderer extends Component implements RenderableComponent {
 
     public void updateModel() {
         McGltf model = ModelStorage.getModel(modelLocation.getValue());
-        if (meshes.isEmpty() || model != meshes.get(0).getGltf()) {
+        if (model != null && (meshes.isEmpty() || model != meshes.get(0).getGltf())) {
             for (RenderableMesh mesh : meshes) {
                 GlbRenderer.remove(mesh);
             }

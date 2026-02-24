@@ -20,7 +20,7 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.List;
 
 public class IntegerToBlockPos extends ValueNode<IntegerToBlockPos> {
-    GenVar<BlockPos> output = new GenVar<>(new BlockPos(0, 0, 0), BlockPos.class, false, "Block Pos");
+    GenVar<BlockPos> output = new GenVar<>(new BlockPos(0, 0, 0), GenVarSerializers.BLOCK_POS, false, false, "Block Pos");
 
     public IntegerToBlockPos(int id, Graph graph) {
         super(id, graph, InitNodes.INT_TO_BLOCK_POS, "Integer to Block Pos", "Data/Conversion");

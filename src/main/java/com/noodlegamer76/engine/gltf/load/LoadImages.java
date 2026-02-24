@@ -3,6 +3,7 @@ package com.noodlegamer76.engine.gltf.load;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.noodlegamer76.engine.NoodleEngine;
 import com.noodlegamer76.engine.gltf.McGltf;
+import com.noodlegamer76.engine.gltf.McGltfLoader;
 import de.javagl.jgltf.model.ImageModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -20,7 +21,7 @@ import java.util.Map;
 
 public class LoadImages {
 
-    public static void loadImages(McGltf gltf) {
+    public static void loadImages(McGltfLoader gltf) {
         ImageData imageData = gltf.getImageData();
         Map<ImageModel, ResourceLocation> uploaded = new HashMap<>();
 

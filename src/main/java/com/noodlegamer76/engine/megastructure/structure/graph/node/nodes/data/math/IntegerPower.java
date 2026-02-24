@@ -16,7 +16,7 @@ import com.noodlegamer76.engine.megastructure.structure.variables.GenVarSerializ
 import java.util.List;
 
 public class IntegerPower extends ValueNode<IntegerPower> {
-    GenVar<Integer> output = new GenVar<>(0, Integer.class, false, "Output");
+    GenVar<Integer> output = new GenVar<>(0, GenVarSerializers.INT, false, false, "Output");
 
     public IntegerPower(int id, Graph graph) {
         super(id, graph, InitNodes.INTEGER_POWER, "Integer: Power", "Data/Math");
